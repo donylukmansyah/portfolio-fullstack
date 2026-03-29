@@ -1,0 +1,28 @@
+app/api/admin/contributions/[id]/route.ts(28,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/contributions/[id]/route.ts(38,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/contributions/route.ts(30,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/experience/[id]/route.ts(28,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/experience/[id]/route.ts(38,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/experience/route.ts(30,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/hero/[id]/route.ts(62,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/hero/[id]/route.ts(79,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/hero/route.ts(46,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/projects/[id]/route.ts(40,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/projects/[id]/route.ts(55,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/projects/route.ts(39,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/settings/route.ts(40,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/skills/[id]/route.ts(28,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/skills/[id]/route.ts(38,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/skills/route.ts(31,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/social-links/[id]/route.ts(28,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/social-links/[id]/route.ts(38,3): error TS2554: Expected 2 arguments, but got 1.
+app/api/admin/social-links/route.ts(31,3): error TS2554: Expected 2 arguments, but got 1.
+components/admin/experience-form.tsx(267,32): error TS2322: Type 'string[] | undefined' is not assignable to type 'string[]'.
+  Type 'undefined' is not assignable to type 'string[]'.
+components/admin/project-form.tsx(284,32): error TS2322: Type 'string[] | undefined' is not assignable to type 'string[]'.
+  Type 'undefined' is not assignable to type 'string[]'.
+components/admin/project-form.tsx(297,32): error TS2322: Type 'string[] | undefined' is not assignable to type 'string[]'.
+  Type 'undefined' is not assignable to type 'string[]'.
+components/admin/project-form.tsx(335,39): error TS2322: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+components/common/theme-provider.tsx(3,52): error TS2724: '"next-themes"' has no exported member named 'ThemeProviderProps'. Did you mean 'ThemeProvider'?

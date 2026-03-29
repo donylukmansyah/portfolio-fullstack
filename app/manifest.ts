@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Naman Barkiya | Applied AI Engineer",
-    short_name: "Naman Barkiya",
+    name: "Dony L | Portfolio",
+    short_name: "Dony L",
     description:
-      "Naman Barkiya - Applied AI Engineer working at the intersection of AI, data, and scalable software systems.",
+      "Dony L - Portfolio website showcasing projects, experience, and contributions.",
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",
@@ -25,9 +25,7 @@ export default function manifest(): MetadataRoute.Manifest {
     ],
     categories: [
       "portfolio",
-      "ai",
       "software engineering",
-      "machine learning",
       "developer",
       "web development",
     ],

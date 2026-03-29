@@ -6,26 +6,41 @@ import React from "react";
 
 import { Icons } from "@/components/common/icons";
 import { Button } from "@/components/ui/button";
-import { ExperienceInterface } from "@/config/experience";
 
-// Helper function to extract year from date
-const getYearFromDate = (date: Date): string => {
-  return new Date(date).getFullYear().toString();
+// DB-backed experience type (from Drizzle schema)
+interface ExperienceData {
+  id: string;
+  slug: string;
+  position: string;
+  company: string;
+  location: string;
+  startDate: string;
+  endDate: string | null;
+  isCurrent: boolean | null;
+  description: string[];
+  skills: string[];
+  companyUrl: string | null;
+  logo: string | null;
+}
+
+// Helper function to extract year from date string
+const getYearFromDate = (dateStr: string): string => {
+  return new Date(dateStr).getFullYear().toString();
 };
 
 // Helper function to get duration text
 const getDurationText = (
-  startDate: Date,
-  endDate: Date | "Present"
+  startDate: string,
+  endDate: string | null,
+  isCurrent: boolean | null
 ): string => {
   const startYear = getYearFromDate(startDate);
-  const endYear =
-    typeof endDate === "string" ? "Present" : getYearFromDate(endDate);
+  const endYear = isCurrent || !endDate ? "Present" : getYearFromDate(endDate);
   return `${startYear} - ${endYear}`;
 };
 
 interface ExperienceCardProps {
-  experience: ExperienceInterface;
+  experience: ExperienceData;
 }
 
 const ExperienceCard: React.FC<ExperienceCardProps> = ({ experience }) => {
@@ -67,7 +82,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({ experience }) => {
             </div>
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/20">
-                {getDurationText(experience.startDate, experience.endDate)}
+                {getDurationText(experience.startDate, experience.endDate, experience.isCurrent)}
               </span>
             </div>
           </div>
@@ -98,7 +113,7 @@ const ExperienceCard: React.FC<ExperienceCardProps> = ({ experience }) => {
           className="rounded-lg w-full sm:w-auto"
           asChild
         >
-          <Link href={`/experience/${experience.id}`}>
+          <Link href={`/experience/${experience.slug}`}>
             View Details
             <Icons.chevronRight className="ml-2 h-4 w-4" />
           </Link>

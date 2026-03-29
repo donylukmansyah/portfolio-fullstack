@@ -13,35 +13,68 @@ import ExperienceCard from "@/components/experience/experience-card";
 import ProjectCard from "@/components/projects/project-card";
 import SkillsCard from "@/components/skills/skills-card";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { featuredContributions } from "@/config/contributions";
-import { experiences } from "@/config/experience";
 import { pagesConfig } from "@/config/pages";
-import { featuredProjects } from "@/config/projects";
 import { siteConfig } from "@/config/site";
-import { featuredSkills } from "@/config/skills";
+import {
+  getFeaturedProjects,
+  getExperiences,
+  getFeaturedContributions,
+  getFeaturedSkills,
+  getActiveHero,
+} from "@/lib/queries";
 import { getFeaturedBlogs } from "@/lib/blogs";
 import { cn } from "@/lib/utils";
 import profileImg from "@/public/profile-img.jpg";
 
+// Default hero fallback values
+const DEFAULT_HERO = {
+  name: "Dony L",
+  title: "Software Engineer",
+  description:
+    "Software engineer building modern web applications and scalable software systems.",
+  image: null,
+  resume: "/resume",
+};
+
 export const metadata: Metadata = {
   title: `${pagesConfig.home.metadata.title}`,
   description:
-    "Naman Barkiya - Applied AI Engineer working at the intersection of AI, data, and scalable software systems. Explore my projects, experience, and contributions.",
+    "Dony L - Portfolio website. Explore my projects, experience, and contributions.",
   alternates: {
     canonical: siteConfig.url,
   },
 };
 
-export default function IndexPage() {
+export default async function IndexPage() {
+  const [featuredProjects, allExperiences, featuredContributions, featuredSkills, heroData] = await Promise.all([
+    getFeaturedProjects(),
+    getExperiences(),
+    getFeaturedContributions(),
+    getFeaturedSkills(),
+    getActiveHero(),
+  ]);
+
   const featuredBlogs = getFeaturedBlogs();
+
+  // Use dynamic hero data or fallback to defaults
+  const hero = heroData
+    ? {
+        name: heroData.name,
+        title: heroData.title,
+        description: heroData.description,
+        image: heroData.image,
+        resume: heroData.resume,
+      }
+    : DEFAULT_HERO;
+
   // Structured data for personal portfolio
   const personSchema = {
     "@context": "https://schema.org",
     "@type": "Person",
-    name: siteConfig.authorName,
+    name: hero.name,
     url: siteConfig.url,
     image: siteConfig.ogImage,
-    jobTitle: "Applied AI Engineer",
+    jobTitle: hero.title,
     sameAs: [siteConfig.links.github, siteConfig.links.twitter],
   };
 
@@ -59,7 +92,7 @@ export default function IndexPage() {
     },
     author: {
       "@type": "Person",
-      name: siteConfig.authorName,
+      name: hero.name,
       url: siteConfig.url,
     },
   };
@@ -80,12 +113,12 @@ export default function IndexPage() {
       <section className="space-y-6 pb-8 pt-6 mb-0 md:pb-12 md:py-20 lg:py-32 h-screen flex items-center">
         <div className="container flex max-w-[64rem] flex-col items-center gap-4 text-center -mt-20">
           <Image
-            src={profileImg}
+            src={hero.image || profileImg}
             height={100}
             width={100}
             sizes="100vw"
             className="bg-primary rounded-full mb-0 h-auto md:mb-2 w-[60%] max-w-[16rem] border-8 border-primary"
-            alt="Naman Barkiya - Applied AI Engineer Portfolio"
+            alt={`${hero.name} - ${hero.title} Portfolio`}
             priority
           />
           <AnimatedText
@@ -93,26 +126,25 @@ export default function IndexPage() {
             delay={0.2}
             className="font-heading text-3xl sm:text-5xl md:text-6xl lg:text-7xl"
           >
-            Naman Barkiya
+            {hero.name}
           </AnimatedText>
           <AnimatedText
             as="h3"
             delay={0.4}
             className="font-heading text-base sm:text-xl md:text-xl lg:text-2xl"
           >
-            Applied AI Engineer
+            {hero.title}
           </AnimatedText>
           <div className="mt-4 max-w-[42rem] text-center">
             <p className="leading-normal text-muted-foreground text-sm sm:text-base">
-              Software engineer working at the intersection of AI, data, and
-              scalable software systems.
+              {hero.description}
             </p>
           </div>
 
           <div className="flex flex-col mt-10 items-center justify-center sm:flex-row sm:space-x-4 gap-3">
             <AnimatedText delay={0.6}>
               <Link
-                href={"/resume"}
+                href={hero.resume || "/resume"}
                 target="_blank"
                 className={cn(buttonVariants({ size: "lg" }))}
                 aria-label="View resume"
@@ -130,7 +162,7 @@ export default function IndexPage() {
                     size: "lg",
                   })
                 )}
-                aria-label="Contact Naman Barkiya"
+                aria-label={`Contact ${hero.name}`}
               >
                 <Icons.contact className="w-4 h-4 mr-2" /> Contact
               </Link>
@@ -163,14 +195,14 @@ export default function IndexPage() {
         </div>
         <div className="w-full">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 w-full items-stretch">
-            {featuredProjects.map((exp, index) => (
+            {featuredProjects.map((project, index) => (
               <AnimatedSection
-                key={exp.id}
+                key={project.id}
                 delay={0.1 * (index + 1)}
                 direction="up"
                 className="h-full w-full min-w-0"
               >
-                <ProjectCard project={exp} />
+                <ProjectCard project={project} />
               </AnimatedSection>
             ))}
           </div>
@@ -204,7 +236,7 @@ export default function IndexPage() {
           </AnimatedText>
         </div>
         <div className="mx-auto grid justify-center gap-4 md:w-full lg:grid-cols-3">
-          {experiences.slice(0, 3).map((experience, index) => (
+          {allExperiences.slice(0, 3).map((experience, index) => (
             <AnimatedSection
               key={experience.id}
               delay={0.1 * (index + 1)}

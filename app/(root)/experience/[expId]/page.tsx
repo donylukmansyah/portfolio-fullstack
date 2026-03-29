@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import ChipContainer from "@/components/ui/chip-container";
 import { ResponsiveTabs } from "@/components/ui/responsive-tabs";
-import { experiences } from "@/config/experience";
+import { getExperienceBySlug } from "@/lib/queries";
 import { siteConfig } from "@/config/site";
 
 interface ExperienceDetailPageProps {
@@ -19,19 +19,19 @@ interface ExperienceDetailPageProps {
   }>;
 }
 
-// Helper function to extract year from date
-const getYearFromDate = (date: Date): string => {
-  return new Date(date).getFullYear().toString();
+// Helper function to extract year from date string
+const getYearFromDate = (dateStr: string): string => {
+  return new Date(dateStr).getFullYear().toString();
 };
 
 // Helper function to get duration text
 const getDurationText = (
-  startDate: Date,
-  endDate: Date | "Present"
+  startDate: string,
+  endDate: string | null,
+  isCurrent: boolean | null
 ): string => {
   const startYear = getYearFromDate(startDate);
-  const endYear =
-    typeof endDate === "string" ? "Present" : getYearFromDate(endDate);
+  const endYear = isCurrent || !endDate ? "Present" : getYearFromDate(endDate);
   return `${startYear} - ${endYear}`;
 };
 
@@ -39,7 +39,7 @@ export async function generateMetadata({
   params,
 }: ExperienceDetailPageProps): Promise<Metadata> {
   const { expId } = await params;
-  const experience = experiences.find((c) => c.id === expId);
+  const experience = await getExperienceBySlug(expId);
 
   if (!experience) {
     return {
@@ -60,7 +60,7 @@ export default async function ExperienceDetailPage({
   params,
 }: ExperienceDetailPageProps) {
   const { expId } = await params;
-  const experience = experiences.find((c) => c.id === expId);
+  const experience = await getExperienceBySlug(expId);
 
   if (!experience) {
     redirect("/experience");
@@ -192,7 +192,8 @@ export default async function ExperienceDetailPage({
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary border border-primary/20">
                       {getDurationText(
                         experience.startDate,
-                        experience.endDate
+                        experience.endDate,
+                        experience.isCurrent
                       )}
                     </span>
                   </div>

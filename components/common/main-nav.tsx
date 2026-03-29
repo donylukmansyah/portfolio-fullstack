@@ -10,10 +10,13 @@ import { Icons } from "@/components/common/icons";
 import { MobileNav } from "@/components/common/mobile-nav";
 import { siteConfig } from "@/config/site";
 import { cn } from "@/lib/utils";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 interface MainNavProps {
   items?: any[];
   children?: React.ReactNode;
+  isAdmin?: boolean;
 }
 
 const norican = Norican({
@@ -37,7 +40,7 @@ const navItemVariants = {
   }),
 };
 
-export function MainNav({ items, children }: MainNavProps) {
+export function MainNav({ items, children, isAdmin }: MainNavProps) {
   const segment = useSelectedLayoutSegment();
   const [showMobileMenu, setShowMobileMenu] = React.useState<boolean>(false);
   const pathname = usePathname();
@@ -85,6 +88,22 @@ export function MainNav({ items, children }: MainNavProps) {
               </Link>
             </motion.div>
           ))}
+          {isAdmin && (
+            <motion.div
+              initial="hidden"
+              animate={{ opacity: 1, y: 0 }}
+              variants={navItemVariants}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Link
+                href="/admin/dashboard"
+                className="flex items-center text-lg font-semibold text-primary/80 transition-colors hover:text-primary sm:text-sm border border-primary/20 px-3 py-1.5 rounded-full bg-primary/10"
+              >
+                Dashboard ↗
+              </Link>
+            </motion.div>
+          )}
         </nav>
       ) : null}
       <motion.button

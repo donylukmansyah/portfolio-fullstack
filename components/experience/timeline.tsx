@@ -7,33 +7,48 @@ import React from "react";
 import { AnimatedSection } from "@/components/common/animated-section";
 import { Icons } from "@/components/common/icons";
 import { Button } from "@/components/ui/button";
-import { ExperienceInterface } from "@/config/experience";
 
-// Helper function to extract year from date
-const getYearFromDate = (date: Date): string => {
-  return new Date(date).getFullYear().toString();
+// DB-backed experience type
+interface ExperienceData {
+  id: string;
+  slug: string;
+  position: string;
+  company: string;
+  location: string;
+  startDate: string;
+  endDate: string | null;
+  isCurrent: boolean | null;
+  description: string[];
+  skills: string[];
+  companyUrl: string | null;
+  logo: string | null;
+}
+
+// Helper function to extract year from date string
+const getYearFromDate = (dateStr: string): string => {
+  return new Date(dateStr).getFullYear().toString();
 };
 
 // Helper function to get duration text
 const getDurationText = (
-  startDate: Date,
-  endDate: Date | "Present"
+  startDate: string,
+  endDate: string | null,
+  isCurrent: boolean | null
 ): string => {
   const startYear = getYearFromDate(startDate);
-  const endYear =
-    typeof endDate === "string" ? "Present" : getYearFromDate(endDate);
+  const endYear = isCurrent || !endDate ? "Present" : getYearFromDate(endDate);
   return `${startYear} - ${endYear}`;
 };
 
 interface TimelineProps {
-  experiences: ExperienceInterface[];
+  experiences: ExperienceData[];
 }
 
 const Timeline: React.FC<TimelineProps> = ({ experiences }) => {
   // Sort experiences by date (most recent first)
   const sortedExperiences = [...experiences].sort((a, b) => {
-    const dateA = a.endDate === "Present" ? new Date() : a.endDate;
-    const dateB = b.endDate === "Present" ? new Date() : b.endDate;
+    const dateA = a.isCurrent || !a.endDate ? new Date() : new Date(a.endDate);
+    const dateB = b.isCurrent || !b.endDate ? new Date() : new Date(b.endDate);
     return dateB.getTime() - dateA.getTime();
   });
 
@@ -67,7 +82,8 @@ const Timeline: React.FC<TimelineProps> = ({ experiences }) => {
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium bg-primary/10 text-primary border border-primary/20 w-fit">
                       {getDurationText(
                         experience.startDate,
-                        experience.endDate
+                        experience.endDate,
+                        experience.isCurrent
                       )}
                     </span>
                   </div>
@@ -100,7 +116,7 @@ const Timeline: React.FC<TimelineProps> = ({ experiences }) => {
                 className="rounded-lg w-full sm:w-auto"
                 asChild
               >
-                <Link href={`/experience/${experience.id}`}>
+                <Link href={`/experience/${experience.slug}`}>
                   View Details
                   <Icons.chevronRight className="ml-2 h-4 w-4" />
                 </Link>

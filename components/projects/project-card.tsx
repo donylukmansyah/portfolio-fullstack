@@ -4,10 +4,20 @@ import Link from "next/link";
 import { Icons } from "@/components/common/icons";
 import { Button } from "@/components/ui/button";
 import ChipContainer from "@/components/ui/chip-container";
-import { ProjectInterface } from "@/config/projects";
+
+// DB-backed project type (from Drizzle schema)
+interface ProjectCardProject {
+  id: string;
+  slug: string;
+  companyName: string;
+  type: string;
+  category: string[];
+  shortDescription: string;
+  companyLogoImg: string | null;
+}
 
 interface ProjectCardProps {
-  project: ProjectInterface;
+  project: ProjectCardProject;
 }
 
 export default function ProjectCard({ project }: ProjectCardProps) {
@@ -16,8 +26,8 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       <div className="relative w-full h-[200px] flex-shrink-0">
         <Image
           className="rounded-lg border border-border object-cover"
-          src={project.companyLogoImg}
-          alt="img"
+          src={project.companyLogoImg || "/logo.png"}
+          alt={project.companyName}
           fill
         />
       </div>
@@ -31,7 +41,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex gap-2 flex-wrap">
           <ChipContainer textArr={project.category} />
         </div>
-        <Link href={`/projects/${project.id}`} className="mt-auto">
+        <Link href={`/projects/${project.slug}`} className="mt-auto">
           <Button variant={"default"} className="mt-2 w-full sm:w-auto">
             Read more
             <Icons.chevronRight className="w-4 ml-1" />
