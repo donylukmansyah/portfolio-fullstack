@@ -7,6 +7,7 @@ import PageContainer from "@/components/common/page-container";
 import { pagesConfig } from "@/config/pages";
 import { siteConfig } from "@/config/site";
 import { getAllBlogsMeta } from "@/lib/blogs";
+import { buildBlogListStructuredData } from "@/lib/blog-metadata";
 
 export const metadata: Metadata = {
   title: pagesConfig.blogs.metadata.title,
@@ -38,73 +39,12 @@ export const metadata: Metadata = {
   },
 };
 
-export default function BlogsPage() {
-  const blogs = getAllBlogsMeta();
-
-  // CollectionPage + Blog JSON-LD for the listing page
-  const blogListSchema = {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    name: `${siteConfig.authorName} — Blog`,
-    description: pagesConfig.blogs.metadata.description,
-    url: `${siteConfig.url}/blogs`,
-    isPartOf: {
-      "@type": "WebSite",
-      name: siteConfig.name,
-      url: siteConfig.url,
-    },
-    author: {
-      "@type": "Person",
-      name: siteConfig.authorName,
-      url: siteConfig.url,
-    },
-    mainEntity: {
-      "@type": "Blog",
-      name: `${siteConfig.authorName}'s Blog`,
-      description: pagesConfig.blogs.metadata.description,
-      url: `${siteConfig.url}/blogs`,
-      author: {
-        "@type": "Person",
-        name: siteConfig.authorName,
-        url: siteConfig.url,
-      },
-      blogPost: blogs.map((blog) => ({
-        "@type": "BlogPosting",
-        headline: blog.title,
-        description: blog.description,
-        datePublished: blog.date,
-        url: `${siteConfig.url}/blogs/${blog.slug}`,
-        author: {
-          "@type": "Person",
-          name: siteConfig.authorName,
-        },
-        keywords: blog.tags.join(", "),
-        ...(blog.coverImage && {
-          image: `${siteConfig.url}${blog.coverImage}`,
-        }),
-      })),
-    },
-  };
-
-  // BreadcrumbList for site hierarchy
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      {
-        "@type": "ListItem",
-        position: 1,
-        name: "Home",
-        item: siteConfig.url,
-      },
-      {
-        "@type": "ListItem",
-        position: 2,
-        name: "Blogs",
-        item: `${siteConfig.url}/blogs`,
-      },
-    ],
-  };
+export default async function BlogsPage() {
+  const blogs = await getAllBlogsMeta();
+  const { blogListSchema, breadcrumbSchema } = buildBlogListStructuredData(
+    blogs,
+    pagesConfig.blogs.metadata.description
+  );
 
   return (
     <>

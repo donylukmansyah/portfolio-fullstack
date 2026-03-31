@@ -15,6 +15,13 @@
       "when": 1774771135693,
       "tag": "0001_tiny_omega_flight",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774847183593,
+      "tag": "0002_amusing_blonde_phantom",
+      "breakpoints": true
     }
   ]
 }

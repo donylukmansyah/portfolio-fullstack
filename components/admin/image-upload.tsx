@@ -5,14 +5,21 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
+import { uploadAdminFile, type UploadedAdminAsset } from "@/lib/admin-upload";
 
 interface ImageUploadProps {
   value: string;
   onChange: (url: string) => void;
   folder?: string;
+  onUploadComplete?: (asset: UploadedAdminAsset) => void;
 }
 
-export function ImageUpload({ value, onChange, folder = "portfolio/misc" }: ImageUploadProps) {
+export function ImageUpload({
+  value,
+  onChange,
+  folder = "portfolio/misc",
+  onUploadComplete,
+}: ImageUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const { toast } = useToast();
 
@@ -26,22 +33,11 @@ export function ImageUpload({ value, onChange, folder = "portfolio/misc" }: Imag
     }
 
     setIsUploading(true);
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("folder", folder);
 
     try {
-      const res = await fetch("/api/admin/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-
-      if (res.ok) {
-        onChange(data.url);
-      } else {
-        throw new Error(data.error || "Upload failed");
-      }
+      const asset = await uploadAdminFile(file, folder);
+      onChange(asset.url);
+      onUploadComplete?.(asset);
     } catch (error: any) {
       toast({ title: "Upload failed", description: error.message, variant: "destructive" });
     } finally {

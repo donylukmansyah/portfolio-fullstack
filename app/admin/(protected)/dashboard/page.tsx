@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { db } from "@/db";
 import {
   projects,
@@ -8,7 +9,8 @@ import {
   contactSubmissions,
   siteSettings,
 } from "@/db/schema";
-import { count, eq } from "drizzle-orm";
+import { count, desc, eq } from "drizzle-orm";
+import { AdminPageHeader } from "@/components/admin/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -19,6 +21,9 @@ import {
   MessageSquare,
   Settings,
   TrendingUp,
+  ArrowRight,
+  Clock3,
+  SquarePen,
 } from "lucide-react";
 
 export const metadata: Metadata = { title: "Dashboard" };
@@ -31,6 +36,8 @@ async function getStats() {
     [contributionCount],
     [messageCount],
     [unreadCount],
+    latestProjects,
+    latestMessages,
   ] = await Promise.all([
     db.select({ count: count() }).from(projects),
     db.select({ count: count() }).from(experiences),
@@ -38,6 +45,27 @@ async function getStats() {
     db.select({ count: count() }).from(contributions),
     db.select({ count: count() }).from(contactSubmissions),
     db.select({ count: count() }).from(contactSubmissions).where(eq(contactSubmissions.isRead, false)),
+    db
+      .select({
+        id: projects.id,
+        title: projects.companyName,
+        slug: projects.slug,
+        createdAt: projects.createdAt,
+      })
+      .from(projects)
+      .orderBy(desc(projects.createdAt))
+      .limit(4),
+    db
+      .select({
+        id: contactSubmissions.id,
+        title: contactSubmissions.name,
+        subtitle: contactSubmissions.email,
+        isRead: contactSubmissions.isRead,
+        createdAt: contactSubmissions.createdAt,
+      })
+      .from(contactSubmissions)
+      .orderBy(desc(contactSubmissions.createdAt))
+      .limit(4),
   ]);
 
   return {
@@ -47,6 +75,8 @@ async function getStats() {
     contributions: contributionCount.count,
     messages: messageCount.count,
     unread: unreadCount.count,
+    latestProjects,
+    latestMessages,
   };
 }
 
@@ -71,19 +101,28 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Overview of your portfolio content
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Overview"
+        title="Dashboard"
+        description="Monitor content health, jump into common admin tasks, and keep the portfolio updated without digging through multiple pages."
+        badge={stats.unread > 0 ? `${stats.unread} unread messages` : "Inbox clear"}
+        actions={
+          <Link
+            href="/admin/projects/new"
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90"
+          >
+            <SquarePen className="mr-2 h-4 w-4" />
+            Add Project
+          </Link>
+        }
+      />
 
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <a key={card.label} href={card.href}>
-              <Card className="hover:shadow-md transition-shadow cursor-pointer border-border/60 hover:border-border">
+            <Link key={card.label} href={card.href}>
+              <Card className="cursor-pointer border-border/60 bg-background/90 transition-all hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-md">
                 <CardHeader className="flex flex-row items-center justify-between pb-2">
                   <CardTitle className="text-sm font-medium text-muted-foreground">
                     {card.label}
@@ -101,12 +140,12 @@ export default async function DashboardPage() {
                   </div>
                 </CardContent>
               </Card>
-            </a>
+            </Link>
           );
         })}
       </div>
 
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-[1.15fr_0.85fr]">
         <Card className="border-border/60">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
@@ -114,7 +153,7 @@ export default async function DashboardPage() {
               Quick Actions
             </CardTitle>
           </CardHeader>
-          <CardContent className="grid grid-cols-2 gap-2">
+          <CardContent className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {[
               { label: "Add Project", href: "/admin/projects/new" },
               { label: "Add Experience", href: "/admin/experience/new" },
@@ -124,13 +163,14 @@ export default async function DashboardPage() {
               { label: "View Messages", href: "/admin/contacts" },
               { label: "Add Contribution", href: "/admin/contributions/new" },
             ].map((action) => (
-              <a
+              <Link
                 key={action.href}
                 href={action.href}
-                className="flex items-center gap-2 rounded-lg border border-border/50 px-3 py-2 text-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                className="flex items-center justify-between rounded-xl border border-border/50 px-3 py-3 text-sm transition-colors hover:bg-accent hover:text-accent-foreground"
               >
-                {action.label}
-              </a>
+                <span>{action.label}</span>
+                <ArrowRight className="h-4 w-4 text-muted-foreground" />
+              </Link>
             ))}
           </CardContent>
         </Card>
@@ -156,6 +196,77 @@ export default async function DashboardPage() {
                 </Badge>
               </div>
             ))}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <Card className="border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Clock3 className="h-4 w-4 text-primary" />
+              Recent Projects
+            </CardTitle>
+            <Link href="/admin/projects" className="text-sm text-primary hover:underline">
+              View all
+            </Link>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {stats.latestProjects.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No project records yet.</p>
+            ) : (
+              stats.latestProjects.map((project) => (
+                <Link
+                  key={project.id}
+                  href={`/admin/projects/${project.id}`}
+                  className="flex items-center justify-between rounded-xl border border-border/50 px-4 py-3 transition-colors hover:bg-accent"
+                >
+                  <div>
+                    <p className="font-medium text-foreground">{project.title}</p>
+                    <p className="text-sm text-muted-foreground">/{project.slug}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(project.createdAt).toLocaleDateString()}
+                  </p>
+                </Link>
+              ))
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/60">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-base flex items-center gap-2">
+              <MessageSquare className="h-4 w-4 text-primary" />
+              Inbox Snapshot
+            </CardTitle>
+            <Link href="/admin/contacts" className="text-sm text-primary hover:underline">
+              Open inbox
+            </Link>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {stats.latestMessages.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No incoming messages yet.</p>
+            ) : (
+              stats.latestMessages.map((message) => (
+                <Link
+                  key={message.id}
+                  href="/admin/contacts"
+                  className="flex items-center justify-between rounded-xl border border-border/50 px-4 py-3 transition-colors hover:bg-accent"
+                >
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-medium text-foreground">{message.title}</p>
+                      {!message.isRead ? <Badge variant="destructive">Unread</Badge> : null}
+                    </div>
+                    <p className="text-sm text-muted-foreground">{message.subtitle}</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(message.createdAt).toLocaleDateString()}
+                  </p>
+                </Link>
+              ))
+            )}
           </CardContent>
         </Card>
       </div>

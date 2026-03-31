@@ -1,6 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -9,11 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Search, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ChevronDown, ChevronUp, Search, X } from "lucide-react";
+import { startTransition, useDeferredValue, useState } from "react";
 
 export type Column<T> = {
   key: keyof T | string;
@@ -29,6 +29,8 @@ interface DataTableProps<T extends { id: string }> {
   searchPlaceholder?: string;
   actions?: (row: T) => React.ReactNode;
   emptyMessage?: string;
+  toolbarActions?: React.ReactNode;
+  summary?: React.ReactNode;
 }
 
 export function DataTable<T extends { id: string }>({
@@ -38,15 +40,20 @@ export function DataTable<T extends { id: string }>({
   searchPlaceholder = "Search...",
   actions,
   emptyMessage = "No items found.",
+  toolbarActions,
+  summary,
 }: DataTableProps<T>) {
   const [search, setSearch] = useState("");
   const [sortKey, setSortKey] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
+  const deferredSearch = useDeferredValue(search);
 
   const filtered = data.filter((row) => {
-    if (!searchKey || !search) return true;
+    if (!searchKey || !deferredSearch) return true;
     const val = row[searchKey];
-    return String(val ?? "").toLowerCase().includes(search.toLowerCase());
+    return String(val ?? "")
+      .toLowerCase()
+      .includes(deferredSearch.toLowerCase());
   });
 
   const sorted = [...filtered].sort((a, b) => {
@@ -67,19 +74,65 @@ export function DataTable<T extends { id: string }>({
 
   return (
     <div className="space-y-3">
-      {searchKey && (
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder={searchPlaceholder}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
+      <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-background/80 p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+          {searchKey ? (
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder={searchPlaceholder}
+                value={search}
+                onChange={(e) => {
+                  const nextValue = e.target.value;
+                  startTransition(() => setSearch(nextValue));
+                }}
+                className="h-10 rounded-xl border-border/60 bg-background pl-9 pr-10"
+              />
+              {search ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute right-1 top-1 h-8 w-8 rounded-lg"
+                  onClick={() => setSearch("")}
+                >
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              ) : null}
+            </div>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge
+              variant="secondary"
+              className="rounded-full px-3 py-1 text-xs font-medium"
+            >
+              {sorted.length} / {data.length} records
+            </Badge>
+            {sortKey ? (
+              <Badge
+                variant="outline"
+                className="rounded-full px-3 py-1 text-xs font-medium"
+              >
+                Sorted by{" "}
+                {
+                  columns.find((column) => String(column.key) === sortKey)
+                    ?.label
+                }{" "}
+                ({sortDir})
+              </Badge>
+            ) : null}
+            {summary}
+          </div>
         </div>
-      )}
 
-      <div className="rounded-lg border border-border/60 overflow-hidden">
+        {toolbarActions ? (
+          <div className="flex flex-wrap items-center gap-2">
+            {toolbarActions}
+          </div>
+        ) : null}
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-border/60 bg-background shadow-sm">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/30 hover:bg-muted/30">
@@ -87,22 +140,31 @@ export function DataTable<T extends { id: string }>({
                 <TableHead
                   key={String(col.key)}
                   className={cn(
-                    "font-medium text-xs uppercase tracking-wider",
-                    col.sortable && "cursor-pointer select-none hover:text-foreground"
+                    "text-xs font-medium uppercase tracking-[0.2em]",
+                    col.sortable &&
+                      "cursor-pointer select-none hover:text-foreground"
                   )}
-                  onClick={col.sortable ? () => toggleSort(String(col.key)) : undefined}
+                  onClick={
+                    col.sortable ? () => toggleSort(String(col.key)) : undefined
+                  }
                 >
                   <div className="flex items-center gap-1">
                     {col.label}
-                    {col.sortable && sortKey === String(col.key) && (
-                      sortDir === "asc"
-                        ? <ChevronUp className="h-3 w-3" />
-                        : <ChevronDown className="h-3 w-3" />
-                    )}
+                    {col.sortable &&
+                      sortKey === String(col.key) &&
+                      (sortDir === "asc" ? (
+                        <ChevronUp className="h-3 w-3" />
+                      ) : (
+                        <ChevronDown className="h-3 w-3" />
+                      ))}
                   </div>
                 </TableHead>
               ))}
-              {actions && <TableHead className="text-right text-xs uppercase tracking-wider font-medium">Actions</TableHead>}
+              {actions && (
+                <TableHead className="text-right text-xs uppercase tracking-wider font-medium">
+                  Actions
+                </TableHead>
+              )}
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,19 +172,40 @@ export function DataTable<T extends { id: string }>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length + (actions ? 1 : 0)}
-                  className="text-center text-muted-foreground py-8"
+                  className="py-12 text-center text-muted-foreground"
                 >
-                  {emptyMessage}
+                  <div className="space-y-1">
+                    <p className="font-medium text-foreground">
+                      {emptyMessage}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {search
+                        ? "Try adjusting your search query."
+                        : "Add your first record to get started."}
+                    </p>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               sorted.map((row) => (
-                <TableRow key={row.id} className="hover:bg-muted/20">
+                <TableRow
+                  key={row.id}
+                  className="transition-colors hover:bg-muted/20"
+                >
                   {columns.map((col) => (
-                    <TableCell key={String(col.key)} className="py-3">
+                    <TableCell
+                      key={String(col.key)}
+                      className="py-3.5 align-middle"
+                    >
                       {col.render
-                        ? col.render((row as Record<string, unknown>)[String(col.key)], row)
-                        : String((row as Record<string, unknown>)[String(col.key)] ?? "—")}
+                        ? col.render(
+                            (row as Record<string, unknown>)[String(col.key)],
+                            row
+                          )
+                        : String(
+                            (row as Record<string, unknown>)[String(col.key)] ??
+                              "—"
+                          )}
                     </TableCell>
                   ))}
                   {actions && (

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AdminPageHeader } from "@/components/admin/page-header";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import {
   Sheet,
@@ -12,6 +13,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useToast } from "@/hooks/use-toast";
+import { deleteAdminRecord, submitAdminForm } from "@/lib/admin-client";
 import { Eye, Trash2, Mail, MailOpen, ExternalLink } from "lucide-react";
 import {
   AlertDialog,
@@ -44,24 +46,34 @@ export function ContactsClient({ initialData }: { initialData: ContactSubmission
   const unreadCount = messages.filter((m) => !m.isRead).length;
 
   const toggleRead = async (msg: ContactSubmission) => {
-    const res = await fetch(`/api/admin/contacts/${msg.id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isRead: !msg.isRead }),
-    });
-    if (res.ok) {
+    try {
+      await submitAdminForm(`/api/admin/contacts/${msg.id}`, "PATCH", {
+        isRead: !msg.isRead,
+      });
       setMessages((prev) =>
         prev.map((m) => (m.id === msg.id ? { ...m, isRead: !m.isRead } : m))
       );
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
   const deleteMessage = async (id: string) => {
-    const res = await fetch(`/api/admin/contacts/${id}`, { method: "DELETE" });
-    if (res.ok) {
+    try {
+      await deleteAdminRecord(`/api/admin/contacts/${id}`);
       setMessages((prev) => prev.filter((m) => m.id !== id));
       if (selected?.id === id) setSelected(null);
       toast({ title: "Message deleted" });
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
     }
   };
 
@@ -113,19 +125,12 @@ export function ContactsClient({ initialData }: { initialData: ContactSubmission
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Messages</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            {unreadCount > 0 ? (
-              <span className="text-orange-500 font-medium">{unreadCount} unread</span>
-            ) : (
-              "All caught up!"
-            )}{" "}
-            · {messages.length} total
-          </p>
-        </div>
-      </div>
+      <AdminPageHeader
+        eyebrow="Inbox"
+        title="Messages"
+        description="Review incoming contact requests, triage unread conversations, and resolve each message without leaving the table."
+        badge={unreadCount > 0 ? `${unreadCount} unread` : "All caught up"}
+      />
 
       <DataTable
         data={messages}
@@ -133,6 +138,7 @@ export function ContactsClient({ initialData }: { initialData: ContactSubmission
         searchKey="name"
         searchPlaceholder="Search by name..."
         emptyMessage="No messages yet."
+        summary={<Badge variant="outline">Total messages: {messages.length}</Badge>}
         actions={(row) => (
           <div className="flex items-center gap-1 justify-end">
             <Button

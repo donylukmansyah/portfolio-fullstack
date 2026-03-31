@@ -1,3 +1,5 @@
+import "dotenv/config";
+
 import { db } from "./db/index";
 import { projects } from "./db/schema/projects";
 import { experiences } from "./db/schema/experiences";

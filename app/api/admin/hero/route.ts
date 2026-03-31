@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import {
+  requireAuth,
+  unauthorizedResponse,
+  validationErrorResponse,
+} from "@/lib/admin-api";
 import { db } from "@/db";
 import { heroContent } from "@/db/schema";
 import { heroContentSchema } from "@/lib/validations";
 import { eq, desc } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-async function requireAuth() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return null;
-  return session;
-}
-
 // GET all hero content entries
 export async function GET() {
   const session = await requireAuth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return unauthorizedResponse();
   const data = await db.select().from(heroContent).orderBy(desc(heroContent.createdAt));
   return NextResponse.json(data);
 }
@@ -24,14 +21,14 @@ export async function GET() {
 // POST create new hero content
 export async function POST(req: NextRequest) {
   const session = await requireAuth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return unauthorizedResponse();
 
   const body = await req.json();
   const parsed = heroContentSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: "Validation failed", details: parsed.error.flatten().fieldErrors },
-      { status: 400 }
+    return validationErrorResponse(
+      parsed.error.flatten().fieldErrors,
+      "Validation failed"
     );
   }
 
@@ -43,6 +40,6 @@ export async function POST(req: NextRequest) {
   const [created] = await db.insert(heroContent).values(parsed.data).returning();
 
   revalidatePath("/");
-  revalidateTag("hero-content", "page" as any);
+  revalidateTag("hero-content", "max");
   return NextResponse.json(created, { status: 201 });
 }

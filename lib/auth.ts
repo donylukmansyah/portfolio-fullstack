@@ -1,7 +1,21 @@
+import "server-only";
+
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "@better-auth/drizzle-adapter";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
+
+function getTrustedOrigins() {
+  const origins = [
+    process.env.BETTER_AUTH_URL,
+    process.env.NEXT_PUBLIC_APP_URL,
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null,
+    "http://localhost:3000",
+  ].filter((value): value is string => Boolean(value));
+
+  return Array.from(new Set(origins));
+}
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -15,12 +29,9 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    // Only one admin account; disable public sign-up
-    disableSignUp: false, // set to true after seeding admin user
+    disableSignUp: process.env.BETTER_AUTH_ALLOW_SIGN_UP !== "true",
   },
-  trustedOrigins: [
-    process.env.BETTER_AUTH_URL || "http://localhost:3000",
-  ],
+  trustedOrigins: getTrustedOrigins(),
   session: {
     cookieCache: {
       enabled: true,

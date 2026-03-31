@@ -1,4 +1,21 @@
 import { z } from "zod";
+import {
+  isBlogContentDocument,
+  normalizeBlogSlug,
+} from "./blog-editor-config";
+
+const optionalMediaField = z
+  .string()
+  .trim()
+  .refine(
+    (value) =>
+      value === "" ||
+      value.startsWith("/") ||
+      /^https?:\/\//.test(value),
+    "Must be a valid URL or root-relative path"
+  )
+  .optional()
+  .or(z.literal(""));
 
 /* ─── Contact ─────────────────────────────────────────────── */
 export const contactSchema = z.object({
@@ -103,3 +120,51 @@ export const heroContentSchema = z.object({
   isActive: z.boolean().default(false),
 });
 export type HeroContentInput = z.infer<typeof heroContentSchema>;
+
+/* ─── Blog ────────────────────────────────────────────────── */
+export const blogSchema = z.object({
+  slug: z
+    .string()
+    .min(1, "Slug is required")
+    .transform(normalizeBlogSlug)
+    .refine(
+      (value) => /^[a-z0-9-]+$/.test(value),
+      "Slug must be lowercase with hyphens only"
+    ),
+  title: z
+    .string()
+    .trim()
+    .min(5, "Title must be at least 5 characters")
+    .max(160, "Title must be under 160 characters"),
+  excerpt: z
+    .string()
+    .trim()
+    .min(20, "Excerpt must be at least 20 characters")
+    .max(320, "Excerpt must be under 320 characters"),
+  tags: z
+    .array(z.string().trim().min(1).max(50))
+    .max(12, "Keep tags to 12 or fewer")
+    .transform((tags) => Array.from(new Set(tags.map((tag) => tag.trim()).filter(Boolean)))),
+  coverImageUrl: optionalMediaField,
+  coverImagePublicId: z.string().optional().or(z.literal("")),
+  status: z.enum(["draft", "published"]).default("draft"),
+  contentJson: z.custom(
+    (value) => isBlogContentDocument(value),
+    "Blog content is required"
+  ),
+  seoTitle: z
+    .string()
+    .trim()
+    .max(160, "SEO title must be under 160 characters")
+    .optional()
+    .or(z.literal("")),
+  seoDescription: z
+    .string()
+    .trim()
+    .max(320, "SEO description must be under 320 characters")
+    .optional()
+    .or(z.literal("")),
+  isFeatured: z.boolean().default(false),
+  sortOrder: z.number().int().default(0),
+});
+export type BlogInput = z.infer<typeof blogSchema>;

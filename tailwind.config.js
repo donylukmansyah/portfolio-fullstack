@@ -1,4 +1,13 @@
 const { fontFamily } = require("tailwindcss/defaultTheme");
+const plugin = require("tailwindcss/plugin");
+
+const customThemeVariants = [
+  "retro",
+  "cyberpunk",
+  "paper",
+  "aurora",
+  "synthwave",
+];
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -102,17 +111,12 @@ module.exports = {
   		}
   	}
   },
-  plugins: [require("tailwindcss-animate")],
-  safelist: [
-    "dark",
-    "retro",
-    "cyberpunk",
-    "paper",
-    "aurora",
-    "synthwave",
-    {
-      pattern:
-        /^(.*?)(dark|retro|cyberpunk|paper|aurora|synthwave)([:.])(.*?)$/,
-    },
+  plugins: [
+    require("tailwindcss-animate"),
+    plugin(function ({ addVariant }) {
+      customThemeVariants.forEach((themeName) => {
+        addVariant(themeName, `.${themeName} &`);
+      });
+    }),
   ],
 };

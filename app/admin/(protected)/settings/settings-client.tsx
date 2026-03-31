@@ -2,6 +2,8 @@
 
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
+import { AdminFormShell } from "@/components/admin/form-shell";
+import { AdminPageHeader } from "@/components/admin/page-header";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -14,8 +16,9 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { ImageUpload } from "@/components/admin/image-upload";
-import { Loader2 } from "lucide-react";
+import { Globe, ImageIcon, Loader2, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { submitAdminForm } from "@/lib/admin-client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -61,15 +64,7 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
       // Convert flat object back to array of {key, value} for the put API
       const body = Object.entries(data).map(([key, value]) => ({ key, value }));
 
-      const res = await fetch("/api/admin/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to save settings");
-      }
+      await submitAdminForm("/api/admin/settings", "PUT", body);
 
       toast({
         title: "Settings saved",
@@ -89,21 +84,72 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Site Settings</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          Manage globals and default values for your portfolio.
-        </p>
-      </div>
+      <AdminPageHeader
+        eyebrow="Globals"
+        title="Site Settings"
+        description="Manage global content defaults, hero copy, contact destination, and SEO metadata from one place."
+        badge={`${Object.keys(initialData).length} setting values loaded`}
+      />
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 pb-10 max-w-4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>Hero Section</CardTitle>
-              <CardDescription>Main content on your landing page.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="pb-10">
+          <AdminFormShell
+            title="Global Site Settings"
+            description="Update homepage defaults, SEO metadata, and contact information. Changes here affect multiple parts of the portfolio."
+            modeLabel="Live Settings"
+            actions={
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Settings
+              </Button>
+            }
+            preview={
+              <>
+                <div className="space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                    Snapshot
+                  </p>
+                  <h2 className="text-lg font-semibold text-foreground">Current output</h2>
+                  <p className="text-sm text-muted-foreground">
+                    A quick sanity check for the most visible global settings.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  <div className="rounded-2xl border border-border/60 p-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <Globe className="h-4 w-4 text-primary" />
+                      Hero
+                    </div>
+                    <p className="mt-2 text-sm">{form.watch("heroTitle") || "No hero title yet"}</p>
+                    <p className="text-xs text-muted-foreground">{form.watch("heroSubtitle") || "No subtitle yet"}</p>
+                  </div>
+                  <div className="rounded-2xl border border-border/60 p-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <Mail className="h-4 w-4 text-primary" />
+                      Contact
+                    </div>
+                    <p className="mt-2 break-all text-sm">{form.watch("contactEmail") || "No contact email set"}</p>
+                  </div>
+                  <div className="rounded-2xl border border-border/60 p-3">
+                    <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+                      <ImageIcon className="h-4 w-4 text-primary" />
+                      SEO
+                    </div>
+                    <p className="mt-2 text-sm">{form.watch("seoTitle") || "No SEO title yet"}</p>
+                    <p className="line-clamp-3 text-xs text-muted-foreground">
+                      {form.watch("seoDescription") || "No SEO description yet"}
+                    </p>
+                  </div>
+                </div>
+              </>
+            }
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>Hero Section</CardTitle>
+                <CardDescription>Main content on your landing page.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
               <FormField
                 control={form.control}
                 name="heroTitle"
@@ -139,15 +185,15 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                   </FormItem>
                 )}
               />
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>About Section</CardTitle>
-              <CardDescription>Personal details and bio.</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>About Section</CardTitle>
+                <CardDescription>Personal details and bio.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
               <FormField
                 control={form.control}
                 name="aboutText"
@@ -172,15 +218,15 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                   </FormItem>
                 )}
               />
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>SEO & Global Details</CardTitle>
-              <CardDescription>Default meta tags for sharing and search engines.</CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-6 md:grid-cols-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>SEO & Global Details</CardTitle>
+                <CardDescription>Default meta tags for sharing and search engines.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-6 md:grid-cols-2">
               <FormField
                 control={form.control}
                 name="contactEmail"
@@ -227,15 +273,9 @@ export function SettingsClient({ initialData }: SettingsClientProps) {
                   </FormItem>
                 )}
               />
-            </CardContent>
-          </Card>
-
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Settings
-            </Button>
-          </div>
+              </CardContent>
+            </Card>
+          </AdminFormShell>
         </form>
       </Form>
     </div>

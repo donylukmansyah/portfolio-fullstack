@@ -1,25 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { contactSubmissions } from "@/db/schema";
+import { checkContactRateLimit } from "@/lib/contact-rate-limit";
 import { contactSchema } from "@/lib/validations";
-
-// Simple in-memory rate limiter (per-IP, 5 requests per hour)
-const rateLimitMap = new Map<string, { count: number; reset: number }>();
-
-function isRateLimited(ip: string): boolean {
-  const now = Date.now();
-  const limit = rateLimitMap.get(ip);
-
-  if (!limit || now > limit.reset) {
-    rateLimitMap.set(ip, { count: 1, reset: now + 60 * 60 * 1000 });
-    return false;
-  }
-
-  if (limit.count >= 5) return true;
-
-  limit.count++;
-  return false;
-}
 
 export async function POST(req: NextRequest) {
   const ip =
@@ -27,10 +10,17 @@ export async function POST(req: NextRequest) {
     req.headers.get("x-real-ip") ||
     "unknown";
 
-  if (isRateLimited(ip)) {
+  const rateLimit = checkContactRateLimit(ip);
+
+  if (!rateLimit.allowed) {
     return NextResponse.json(
       { error: "Too many submissions. Please wait before trying again." },
-      { status: 429 }
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(Math.ceil(rateLimit.retryAfterMs / 1000)),
+        },
+      }
     );
   }
 

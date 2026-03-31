@@ -1,11 +1,13 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { socialLinkSchema, type SocialLinkInput } from "@/lib/validations";
+import { AdminFormShell } from "@/components/admin/form-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { socialLinkSchema, type SocialLinkInput } from "@/lib/validations";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -14,10 +16,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import { submitAdminForm } from "@/lib/admin-client";
+import { ExternalLink, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 interface SocialLinkFormProps {
@@ -44,19 +46,12 @@ export function SocialLinkForm({ initialData }: SocialLinkFormProps) {
     setIsLoading(true);
     try {
       const isEdit = !!initialData;
-      const url = isEdit ? `/api/admin/social-links/${initialData.id}` : "/api/admin/social-links";
+      const url = isEdit
+        ? `/api/admin/social-links/${initialData.id}`
+        : "/api/admin/social-links";
       const method = isEdit ? "PUT" : "POST";
 
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error ? JSON.stringify(errorData.error) : "Something went wrong");
-      }
+      await submitAdminForm(url, method, data);
 
       toast({
         title: isEdit ? "Social link updated" : "Social link created",
@@ -78,81 +73,142 @@ export function SocialLinkForm({ initialData }: SocialLinkFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Social Link Information</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Platform Name</FormLabel>
-                  <FormControl><Input placeholder="E.g. GitHub, LinkedIn, Twitter..." {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl><Input placeholder="E.g. namanbarkiya" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="link"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>URL</FormLabel>
-                  <FormControl><Input placeholder="https://..." {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="iconKey"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Icon Key</FormLabel>
-                   <FormControl><Input placeholder="E.g. github, linkedin..." {...field} value={field.value || ""} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="sortOrder"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sort Order</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-        
-        <div className="flex justify-end gap-4">
-          <Button variant="outline" type="button" onClick={() => router.push("/admin/social-links")}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Social Link
-          </Button>
-        </div>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <AdminFormShell
+          title={initialData ? "Edit Social Link" : "Create Social Link"}
+          description="Maintain clean outbound profile links with clear ordering and platform metadata."
+          modeLabel={initialData ? "Edit Mode" : "Create Mode"}
+          actions={
+            <>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => router.push("/admin/social-links")}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Social Link
+              </Button>
+            </>
+          }
+          preview={
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  Quick Preview
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-foreground">
+                  {form.watch("name") || "Untitled platform"}
+                </h2>
+              </div>
+              <div className="rounded-2xl border border-border/60 p-3">
+                <p className="font-medium text-foreground">
+                  @{form.watch("username") || "username"}
+                </p>
+                <p className="mt-1 break-all text-muted-foreground">
+                  {form.watch("link") || "https://..."}
+                </p>
+              </div>
+              {form.watch("link") ? (
+                <a
+                  href={form.watch("link")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                >
+                  Open link
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              ) : null}
+            </div>
+          }
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Social Link Information</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Platform Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="E.g. GitHub, LinkedIn, Twitter..."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input placeholder="E.g. namanbarkiya" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="link"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>URL</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="iconKey"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Icon Key</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="E.g. github, linkedin..."
+                        {...field}
+                        value={field.value || ""}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sortOrder"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sort Order</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        </AdminFormShell>
       </form>
     </Form>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
+import { deleteAdminRecord } from "@/lib/admin-client";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2 } from "lucide-react";
 import {
@@ -30,8 +31,7 @@ export function HeroDeleteButton({ id, name }: HeroDeleteButtonProps) {
   async function handleDelete() {
     setLoading(true);
     try {
-      const res = await fetch(`/api/admin/hero/${id}`, { method: "DELETE" });
-      if (!res.ok) throw new Error("Failed to delete");
+      await deleteAdminRecord(`/api/admin/hero/${id}`);
 
       toast({
         title: "Hero content deleted",

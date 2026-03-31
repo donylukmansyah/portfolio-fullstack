@@ -2,21 +2,13 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { AdminTableRowActions } from "@/components/admin/table-row-actions";
+import { AdminPageHeader } from "@/components/admin/page-header";
 import { DataTable, type Column } from "@/components/admin/data-table";
 import { useToast } from "@/hooks/use-toast";
-import { Edit, Trash2, Plus, ExternalLink } from "lucide-react";
+import { deleteAdminRecord } from "@/lib/admin-client";
+import { Plus } from "lucide-react";
 import Link from "next/link";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 
 type Project = {
@@ -31,16 +23,13 @@ type Project = {
 export function ProjectsClient({ initialData }: { initialData: Project[] }) {
   const [data, setData] = useState(initialData);
   const { toast } = useToast();
+  const featuredCount = data.filter((item) => item.isFeatured).length;
 
   const handleDelete = async (id: string) => {
     try {
-      const res = await fetch(`/api/admin/projects/${id}`, { method: "DELETE" });
-      if (res.ok) {
-        setData((prev) => prev.filter((item) => item.id !== id));
-        toast({ title: "Project deleted successfully" });
-      } else {
-        throw new Error("Failed to delete project");
-      }
+      await deleteAdminRecord(`/api/admin/projects/${id}`);
+      setData((prev) => prev.filter((item) => item.id !== id));
+      toast({ title: "Project deleted successfully" });
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });
     }
@@ -65,19 +54,19 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Projects</h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Manage your portfolio projects.
-          </p>
-        </div>
-        <Button asChild>
-          <Link href="/admin/projects/new">
-            <Plus className="mr-2 h-4 w-4" /> Add Project
-          </Link>
-        </Button>
-      </div>
+      <AdminPageHeader
+        eyebrow="CRUD"
+        title="Projects"
+        description="Manage portfolio entries, keep featured work visible, and jump directly to edit or public preview from one workspace."
+        badge={`${featuredCount} featured`}
+        actions={
+          <Button asChild>
+            <Link href="/admin/projects/new">
+              <Plus className="mr-2 h-4 w-4" /> Add Project
+            </Link>
+          </Button>
+        }
+      />
 
       <DataTable
         data={data}
@@ -85,44 +74,15 @@ export function ProjectsClient({ initialData }: { initialData: Project[] }) {
         searchKey="companyName"
         searchPlaceholder="Search projects by name..."
         emptyMessage="No projects found."
+        summary={<Badge variant="outline">Featured: {featuredCount}</Badge>}
         actions={(row) => (
-          <div className="flex items-center gap-1 justify-end">
-            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-              <a href={`/projects/${row.slug}`} target="_blank" rel="noopener noreferrer" title="View live">
-                <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-              </a>
-            </Button>
-            <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-              <Link href={`/admin/projects/${row.id}`} title="Edit">
-                <Edit className="h-3.5 w-3.5 text-muted-foreground" />
-              </Link>
-            </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive">
-                  <Trash2 className="h-3.5 w-3.5" />
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete project?</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will permanently delete the project "{row.companyName}".
-                    This action cannot be undone.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDelete(row.id)}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  >
-                    Delete
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
+          <AdminTableRowActions
+            previewHref={`/projects/${row.slug}`}
+            editHref={`/admin/projects/${row.id}`}
+            deleteTitle="Delete project?"
+            deleteDescription={`This will permanently delete the project "${row.companyName}". This action cannot be undone.`}
+            onDelete={() => handleDelete(row.id)}
+          />
         )}
       />
     </div>

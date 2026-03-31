@@ -1,7 +1,35 @@
+import "server-only";
+
 import { db } from "@/db";
-import { projects, experiences, skills, contributions, socialLinks, siteSettings, heroContent } from "@/db/schema";
-import { eq, desc, asc } from "drizzle-orm";
+import {
+  blogs,
+  contributions,
+  experiences,
+  heroContent,
+  projects,
+  siteSettings,
+  skills,
+  socialLinks,
+} from "@/db/schema";
+import { and, asc, desc, eq } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
+
+function isMissingBlogsTableError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const code = "code" in error ? error.code : undefined;
+  const message = "message" in error ? String(error.message) : "";
+  const cause =
+    "cause" in error ? (error.cause as unknown) : undefined;
+
+  return (
+    code === "42P01" ||
+    message.includes('relation "blogs" does not exist') ||
+    isMissingBlogsTableError(cause)
+  );
+}
 
 /* ─── Projects ─────────────────────────────────────────────── */
 export const getProjects = unstable_cache(
@@ -20,14 +48,124 @@ export const getFeaturedProjects = unstable_cache(
   { tags: ["projects"], revalidate: 3600 }
 );
 
-export const getProjectBySlug = unstable_cache(
-  async (slug: string) => {
-    const [project] = await db.select().from(projects).where(eq(projects.slug, slug));
-    return project ?? null;
+export const getProjectBySlug = async (slug: string) => {
+  return unstable_cache(
+    async () => {
+      const [project] = await db.select().from(projects).where(eq(projects.slug, slug));
+      return project ?? null;
+    },
+    [`project-by-slug-${slug}`],
+    { tags: ["projects"], revalidate: 3600 }
+  )();
+};
+
+/* ─── Blogs ────────────────────────────────────────────────── */
+export const getPublishedBlogs = unstable_cache(
+  async () => {
+    try {
+      return await db
+        .select()
+        .from(blogs)
+        .where(eq(blogs.status, "published"))
+        .orderBy(
+          desc(blogs.publishedAt),
+          asc(blogs.sortOrder),
+          desc(blogs.createdAt)
+        );
+    } catch (error) {
+      if (isMissingBlogsTableError(error)) {
+        return [];
+      }
+
+      throw error;
+    }
   },
-  ["project-by-slug"],
-  { tags: ["projects"], revalidate: 3600 }
+  ["published-blogs"],
+  { tags: ["blogs"], revalidate: 3600 }
 );
+
+export const getFeaturedBlogs = unstable_cache(
+  async () => {
+    try {
+      const featured = await db
+        .select()
+        .from(blogs)
+        .where(and(eq(blogs.status, "published"), eq(blogs.isFeatured, true)))
+        .orderBy(asc(blogs.sortOrder), desc(blogs.publishedAt))
+        .limit(3);
+
+      if (featured.length > 0) {
+        return featured;
+      }
+
+      return await db
+        .select()
+        .from(blogs)
+        .where(eq(blogs.status, "published"))
+        .orderBy(desc(blogs.publishedAt), asc(blogs.sortOrder))
+        .limit(3);
+    } catch (error) {
+      if (isMissingBlogsTableError(error)) {
+        return [];
+      }
+
+      throw error;
+    }
+  },
+  ["featured-blogs"],
+  { tags: ["blogs"], revalidate: 3600 }
+);
+
+export const getPublishedBlogBySlug = async (slug: string) => {
+  return unstable_cache(
+    async () => {
+      try {
+        const [blog] = await db
+          .select()
+          .from(blogs)
+          .where(and(eq(blogs.slug, slug), eq(blogs.status, "published")))
+          .limit(1);
+        return blog ?? null;
+      } catch (error) {
+        if (isMissingBlogsTableError(error)) {
+          return null;
+        }
+
+        throw error;
+      }
+    },
+    [`published-blog-by-slug-${slug}`],
+    { tags: ["blogs"], revalidate: 3600 }
+  )();
+};
+
+export async function getAdminBlogs() {
+  try {
+    return await db
+      .select()
+      .from(blogs)
+      .orderBy(desc(blogs.updatedAt), desc(blogs.createdAt));
+  } catch (error) {
+    if (isMissingBlogsTableError(error)) {
+      return [];
+    }
+
+    throw error;
+  }
+}
+
+export async function getBlogById(id: string) {
+  try {
+    const [blog] = await db.select().from(blogs).where(eq(blogs.id, id)).limit(1);
+    return blog ?? null;
+  } catch (error) {
+    if (isMissingBlogsTableError(error)) {
+      return null;
+    }
+
+    throw error;
+  }
+}
 
 /* ─── Experiences ──────────────────────────────────────────── */
 export const getExperiences = unstable_cache(
@@ -38,14 +176,16 @@ export const getExperiences = unstable_cache(
   { tags: ["experiences"], revalidate: 3600 }
 );
 
-export const getExperienceBySlug = unstable_cache(
-  async (slug: string) => {
-    const [exp] = await db.select().from(experiences).where(eq(experiences.slug, slug));
-    return exp ?? null;
-  },
-  ["experience-by-slug"],
-  { tags: ["experiences"], revalidate: 3600 }
-);
+export const getExperienceBySlug = async (slug: string) => {
+  return unstable_cache(
+    async () => {
+      const [exp] = await db.select().from(experiences).where(eq(experiences.slug, slug));
+      return exp ?? null;
+    },
+    [`experience-by-slug-${slug}`],
+    { tags: ["experiences"], revalidate: 3600 }
+  )();
+};
 
 /* ─── Skills ───────────────────────────────────────────────── */
 export const getSkills = unstable_cache(
@@ -116,4 +256,3 @@ export const getActiveHero = unstable_cache(
   ["active-hero"],
   { tags: ["hero-content"], revalidate: 3600 }
 );
-

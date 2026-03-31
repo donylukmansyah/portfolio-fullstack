@@ -1,11 +1,26 @@
+import "server-only";
+
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
-import { config } from "dotenv";
 
-config({ path: ".env.local" });
+declare global {
+  var postgresClient: postgres.Sql | undefined;
+}
 
-const connectionString = process.env.DATABASE_URL!;
+function createPostgresClient() {
+  const connectionString = process.env.DATABASE_URL;
 
-// Disable prefetch as it is not supported for "Transaction" pool mode
-const client = postgres(connectionString, { prepare: false });
+  if (!connectionString) {
+    throw new Error("DATABASE_URL is not configured.");
+  }
+
+  return postgres(connectionString, { prepare: false });
+}
+
+const client = globalThis.postgresClient ?? createPostgresClient();
+
+if (process.env.NODE_ENV !== "production") {
+  globalThis.postgresClient = client;
+}
+
 export const db = drizzle({ client });

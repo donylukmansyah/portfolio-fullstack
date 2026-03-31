@@ -3,10 +3,11 @@ import Link from "next/link";
 import { db } from "@/db";
 import { heroContent } from "@/db/schema";
 import { desc } from "drizzle-orm";
+import { AdminPageHeader } from "@/components/admin/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Trash2, Home } from "lucide-react";
+import { Plus, Pencil, Home } from "lucide-react";
 import { HeroDeleteButton } from "./hero-delete-button";
 
 export const metadata: Metadata = { title: "Hero Content" };
@@ -20,22 +21,19 @@ export default async function HeroAdminPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-            <Home className="h-6 w-6 text-primary" />
-            Hero Content
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            Manage the hero section displayed on the homepage. Only one entry can be active at a time.
-          </p>
-        </div>
-        <Link href="/admin/hero/new">
-          <Button size="sm">
-            <Plus className="h-4 w-4 mr-2" /> Add Hero
-          </Button>
-        </Link>
-      </div>
+      <AdminPageHeader
+        eyebrow="Homepage"
+        title="Hero Content"
+        description="Manage the primary homepage hero section. Only one hero entry should be active at any time."
+        badge={`${entries.filter((entry) => entry.isActive).length} active`}
+        actions={
+          <Link href="/admin/hero/new">
+            <Button size="sm">
+              <Plus className="mr-2 h-4 w-4" /> Add Hero
+            </Button>
+          </Link>
+        }
+      />
 
       {entries.length === 0 ? (
         <Card className="border-dashed border-2">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,7 +27,6 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function AdminLoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,17 +42,37 @@ export default function AdminLoginPage() {
     setIsLoading(true);
     setError(null);
 
-    const { error } = await authClient.signIn.email({
-      email: data.email,
-      password: data.password,
-    });
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
-    if (error) {
-      setError(error.message || "Invalid email or password");
+    try {
+      const result = await Promise.race([
+        authClient.signIn.email({
+          email: data.email,
+          password: data.password,
+        }),
+        new Promise<never>((_, reject) => {
+          timeoutId = setTimeout(() => {
+            reject(
+              new Error(
+                "Login request timed out. Check your database/auth connection and try again."
+              )
+            );
+          }, 12000);
+        }),
+      ]);
+
+      if (result.error) {
+        setError(result.error.message || "Invalid email or password");
+        return;
+      }
+
+      // Full reload is more reliable here because auth is cookie-based.
+      window.location.assign("/admin/dashboard");
+    } catch (error: any) {
+      setError(error.message || "Unable to sign in right now.");
+    } finally {
+      if (timeoutId) clearTimeout(timeoutId);
       setIsLoading(false);
-    } else {
-      router.push("/admin/dashboard");
-      router.refresh(); // Refresh to apply middleware state
     }
   }
 

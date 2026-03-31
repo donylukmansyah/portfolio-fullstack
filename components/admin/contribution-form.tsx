@@ -1,11 +1,8 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { contributionSchema, type ContributionInput } from "@/lib/validations";
+import { AdminFormShell } from "@/components/admin/form-shell";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -14,11 +11,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
+import { submitAdminForm } from "@/lib/admin-client";
+import { contributionSchema, type ContributionInput } from "@/lib/validations";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ExternalLink, Loader2, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 
 interface ContributionFormProps {
   initialData?: ContributionInput & { id: string };
@@ -45,19 +47,12 @@ export function ContributionForm({ initialData }: ContributionFormProps) {
     setIsLoading(true);
     try {
       const isEdit = !!initialData;
-      const url = isEdit ? `/api/admin/contributions/${initialData.id}` : "/api/admin/contributions";
+      const url = isEdit
+        ? `/api/admin/contributions/${initialData.id}`
+        : "/api/admin/contributions";
       const method = isEdit ? "PUT" : "POST";
 
-      const res = await fetch(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error ? JSON.stringify(errorData.error) : "Something went wrong");
-      }
+      await submitAdminForm(url, method, data);
 
       toast({
         title: isEdit ? "Contribution updated" : "Contribution added",
@@ -79,93 +74,166 @@ export function ContributionForm({ initialData }: ContributionFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8 max-w-2xl">
-        <Card>
-          <CardHeader>
-            <CardTitle>Contribution Details</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-6">
-            <FormField
-              control={form.control}
-              name="repo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Repository Name</FormLabel>
-                  <FormControl><Input placeholder="E.g. next.js" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="repoOwner"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Repository Owner</FormLabel>
-                  <FormControl><Input placeholder="E.g. vercel" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl><Input placeholder="What did you contribute?" {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="link"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Contribution Link</FormLabel>
-                  <FormControl><Input placeholder="https://github.com/..." {...field} /></FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="isFeatured"
-              render={({ field }) => (
-                <FormItem className="flex flex-row items-center gap-2 space-y-0 rounded-md border p-4">
-                  <FormControl>
-                    <input type="checkbox" checked={field.value} onChange={field.onChange} className="h-4 w-4" />
-                  </FormControl>
-                  <FormLabel>Featured</FormLabel>
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="sortOrder"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Sort Order</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </CardContent>
-        </Card>
-        
-        <div className="flex justify-end gap-4">
-          <Button variant="outline" type="button" onClick={() => router.push("/admin/contributions")}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Contribution
-          </Button>
-        </div>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <AdminFormShell
+          title={initialData ? "Edit Contribution" : "Create Contribution"}
+          description="Track repository contributions with cleaner metadata, stronger featured controls, and quick outbound verification."
+          modeLabel={initialData ? "Edit Mode" : "Create Mode"}
+          actions={
+            <>
+              <Button
+                variant="outline"
+                type="button"
+                onClick={() => router.push("/admin/contributions")}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Contribution
+              </Button>
+            </>
+          }
+          preview={
+            <div className="space-y-3 text-sm">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  Quick Preview
+                </p>
+                <h2 className="mt-1 text-lg font-semibold text-foreground">
+                  {form.watch("repoOwner") || "owner"}/
+                  {form.watch("repo") || "repository"}
+                </h2>
+                <p className="text-muted-foreground">
+                  {form.watch("description") ||
+                    "Add a short description to summarize the contribution."}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-border/60 p-3">
+                <div className="flex items-center gap-2 font-medium text-foreground">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Visibility
+                </div>
+                <p className="mt-2 text-muted-foreground">
+                  {form.watch("isFeatured")
+                    ? "Featured contribution"
+                    : "Standard contribution"}
+                </p>
+              </div>
+              {form.watch("link") ? (
+                <a
+                  href={form.watch("link")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                >
+                  Open contribution link
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              ) : null}
+            </div>
+          }
+        >
+          <Card>
+            <CardHeader>
+              <CardTitle>Contribution Details</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-6">
+              <FormField
+                control={form.control}
+                name="repo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Repository Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="E.g. next.js" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="repoOwner"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Repository Owner</FormLabel>
+                    <FormControl>
+                      <Input placeholder="E.g. vercel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="What did you contribute?"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="link"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Contribution Link</FormLabel>
+                    <FormControl>
+                      <Input placeholder="https://github.com/..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="isFeatured"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-md border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel>Featured</FormLabel>
+                      <p className="text-sm text-muted-foreground">
+                        Highlight this contribution in key showcase sections.
+                      </p>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="sortOrder"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sort Order</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </CardContent>
+          </Card>
+        </AdminFormShell>
       </form>
     </Form>
   );

@@ -1,28 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requireAuth, unauthorizedResponse } from "@/lib/admin-api";
 import { db } from "@/db";
 import { siteSettings } from "@/db/schema";
 import { siteSettingSchema } from "@/lib/validations";
 import { eq } from "drizzle-orm";
 import { revalidatePath, revalidateTag } from "next/cache";
 
-async function requireAuth() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session) return null;
-  return session;
-}
-
 export async function GET() {
   const session = await requireAuth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return unauthorizedResponse();
   const data = await db.select().from(siteSettings).orderBy(siteSettings.key);
   return NextResponse.json(data);
 }
 
 export async function PUT(req: NextRequest) {
   const session = await requireAuth();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!session) return unauthorizedResponse();
   // Expects array of { key, value }
   const body: Array<{ key: string; value: string }> = await req.json();
   const results = await Promise.all(
@@ -37,6 +30,6 @@ export async function PUT(req: NextRequest) {
     })
   );
   revalidatePath("/");
-  revalidateTag("site-settings", "page" as any);
+  revalidateTag("site-settings", "max");
   return NextResponse.json(results.flat().filter(Boolean));
 }
