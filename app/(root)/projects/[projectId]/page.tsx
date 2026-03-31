@@ -7,6 +7,7 @@ import ProjectDescription from "@/components/projects/project-description";
 import { buttonVariants } from "@/components/ui/button";
 import ChipContainer from "@/components/ui/chip-container";
 import CustomTooltip from "@/components/ui/custom-tooltip";
+import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/config/site";
 import { getProjectBySlug } from "@/lib/queries";
 import { cn, formatDateFromObj } from "@/lib/utils";
@@ -148,7 +149,7 @@ export default async function Project({ params }: ProjectPageProps) {
         </div>
       )}
 
-      <hr className="mt-12" />
+      <Separator className="mt-12" />
       <div className="flex justify-center py-6 lg:py-10">
         <Link
           href="/projects"

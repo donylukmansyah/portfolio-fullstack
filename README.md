@@ -81,14 +81,20 @@ Easily personalize your portfolio using the configuration files below:
 
 | Section            | How to Customize                                       | File Location             |
 | ------------------ | ------------------------------------------------------ | ------------------------- |
-| **Personal Info**  | Edit your name, bio, and social links                  | `config/site.ts`          |
-| **Skills**         | Add or modify the technologies and skills you showcase | `config/skills.ts`        |
-| **Projects**       | Highlight your technical projects                      | `config/projects.ts`      |
-| **Experience**     | Add your work and professional experience              | `config/experience.ts`    |
-| **Contributions**  | Display open-source/community contributions            | `config/contributions.ts` |
-| **Colors & Theme** | Customize color palette and themes                     | `tailwind.config.js`      |
+| **Personal Info**  | Edit your name, metadata, and site URLs                | `config/site.ts`          |
+| **Page Copy**      | Adjust page titles and SEO descriptions                | `config/pages.ts`         |
+| **Admin Content**  | Manage live projects, skills, experience, and content  | `/admin/*`                |
+| **Seed Data**      | Change initial database seed records                   | `db/seed-data/*`          |
+| **Colors & Theme** | Customize color palette, themes, and global styles     | `tailwind.config.js`, `app/styles/*` |
 
 All configuration files are well-organized and documented for a smooth customization process.
+
+For a fresh admin setup after configuring your environment:
+
+```bash
+pnpm db:seed
+pnpm db:create-admin
+```
 
 ## 🌟 Features In Detail
 

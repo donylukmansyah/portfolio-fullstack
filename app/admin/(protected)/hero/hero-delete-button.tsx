@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { deleteAdminRecord } from "@/lib/admin-client";
 import { useRouter } from "next/navigation";
 import { Trash2, Loader2 } from "lucide-react";

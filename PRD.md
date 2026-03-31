@@ -50,7 +50,7 @@ Migrate the portfolio to a **dynamic CMS-backed architecture** powered by **Supa
 |---|---|---|
 | A-1 | As an **admin**, I want to log in securely so that only I can manage content | • Better Auth with email/password (single admin account)<br>• Session persists with HTTP-only cookies<br>• Protected `/admin/*` routes redirect unauthenticated users to login<br>• Login page built with shadcn/ui `Card`, `Input`, `Button` |
 | A-2 | As an **admin**, I want to create/edit/delete projects so I can keep my portfolio current | • CRUD form built with shadcn/ui components (Form, Input, Textarea, Select, Switch)<br>• Image/video upload to Cloudinary via shadcn `Dialog` modal<br>• Data table with shadcn `Table` + sorting/filtering<br>• Revalidation triggers on save to update public pages |
-| A-3 | As an **admin**, I want to manage experience entries so they reflect my career accurately | • CRUD form with all [ExperienceInterface](file:///d:/PEMROGRAMAN/PORTFOLIO%20NEW/my-portfolio/config/experience.ts#3-16) fields using shadcn/ui<br>• Support for "Present" as end date via shadcn `Switch`<br>• Inline ordering/drag-sort |
+| A-3 | As an **admin**, I want to manage experience entries so they reflect my career accurately | • CRUD form with all experience fields from the CMS schema using shadcn/ui<br>• Support for "Present" as end date via shadcn `Switch`<br>• Inline ordering/drag-sort |
 | A-4 | As an **admin**, I want to manage skills so my tech stack stays up to date | • CRUD form with name, description, rating (1-5 via shadcn `Slider`), icon selection via `Select`<br>• Featured skills toggle via shadcn `Switch` |
 | A-5 | As an **admin**, I want to view contact submissions so I don't miss messages | • Paginated data table with shadcn `Table` + search/filter<br>• Mark as read/unread via `Badge` indicators<br>• Detail view in shadcn `Sheet` side panel |
 | A-6 | As an **admin**, I want to manage contributions so my open-source work is visible | • CRUD form with shadcn/ui components<br>• List view with shadcn `Table` |
@@ -306,7 +306,7 @@ sequenceDiagram
 | `PATCH` | `/api/admin/contacts/[id]` | Mark read/unread |
 | `PUT` | `/api/admin/site-settings` | Update site settings |
 
-> Repeat the CRUD pattern for `experience`, [skills](file:///d:/PEMROGRAMAN/PORTFOLIO%20NEW/my-portfolio/config/skills.ts#3-9), [contributions](file:///d:/PEMROGRAMAN/PORTFOLIO%20NEW/my-portfolio/config/contributions.ts#1-7), `social-links`.
+> Repeat the CRUD pattern for `experience`, `skills`, `contributions`, and `social-links`.
 
 #### Revalidation Strategy
 
@@ -703,18 +703,18 @@ A seed script (`db/seed.ts`) will programmatically migrate all existing static d
 
 ```typescript
 // Pseudocode
-import { Projects } from "@/config/projects";
-import { experiences } from "@/config/experience";
-import { skillsUnsorted } from "@/config/skills";
-import { contributionsUnsorted } from "@/config/contributions";
-import { SocialLinks } from "@/config/socials";
+import { seedProjects } from "@/db/seed-data/projects";
+import { seedExperiences } from "@/db/seed-data/experience";
+import { seedSkills } from "@/db/seed-data/skills";
+import { seedContributions } from "@/db/seed-data/contributions";
+import { seedSocialLinks } from "@/db/seed-data/socials";
 import { siteConfig } from "@/config/site";
 
 // For each static array → INSERT into corresponding table
 // Preserve all fields, generate UUIDs, set timestamps
 ```
 
-After migration is verified, the `config/` static files can be archived (not deleted immediately, kept as backup).
+After migration is verified, legacy static content files can be removed and the seed data can live under `db/seed-data/`.
 
 ---
 

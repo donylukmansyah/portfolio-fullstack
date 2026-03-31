@@ -1,35 +1,28 @@
-import { Icons } from "@/components/common/icons";
+import { SeedSocialLink } from "./types";
 
-interface SocialInterface {
-  name: string;
-  username: string;
-  icon: any;
-  link: string;
-}
-
-export const SocialLinks: SocialInterface[] = [
+export const seedSocialLinks: SeedSocialLink[] = [
   {
     name: "Github",
     username: "@namanbarkiya",
-    icon: Icons.gitHub,
+    iconKey: "gitHub",
     link: "https://github.com/namanbarkiya",
   },
   {
     name: "LinkedIn",
     username: "Naman Barkiya",
-    icon: Icons.linkedin,
+    iconKey: "linkedin",
     link: "https://www.linkedin.com/in/namanbarkiya",
   },
   {
     name: "Twitter",
     username: "@namanbarkiya",
-    icon: Icons.twitter,
+    iconKey: "twitter",
     link: "https://twitter.com/namanbarkiya",
   },
   {
     name: "Gmail",
     username: "naman.barkiya02",
-    icon: Icons.gmail,
+    iconKey: "gmail",
     link: "mailto:naman.barkiya02@gmail.com",
   },
 ];

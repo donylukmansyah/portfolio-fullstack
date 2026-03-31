@@ -1,47 +1,42 @@
-export interface contributionsInterface {
-  repo: string;
-  contibutionDescription: string;
-  repoOwner: string;
-  link: string;
-}
+import { SeedContribution } from "./types";
 
-export const contributionsUnsorted: contributionsInterface[] = [
+export const seedContributions: SeedContribution[] = [
   {
     repo: "minimal-next-portfolio",
-    contibutionDescription:
+    description:
       "Open-source Next.js portfolio template. Trusted and forked by developers worldwide (130+ GitHub stars).",
     repoOwner: "namanbarkiya",
     link: "https://github.com/namanbarkiya/minimal-next-portfolio",
+    isFeatured: true,
   },
   {
     repo: "niya-saas-template",
-    contibutionDescription:
+    description:
       "Modern Next.js SaaS template. Production-ready starter for devs and AI startups (30+ GitHub stars).",
     repoOwner: "namanbarkiya",
     link: "https://github.com/namanbarkiya/niya-saas-template",
+    isFeatured: true,
   },
   {
     repo: "autogen",
-    contibutionDescription:
+    description:
       "Improved the gallery component to showcase the community work.",
     repoOwner: "Microsoft",
     link: "https://github.com/microsoft/autogen/pull/1445",
+    isFeatured: true,
   },
   {
     repo: "creativecommons",
-    contibutionDescription:
+    description:
       "Closed Issue: Fixed navbar issue on the main website of creative common.",
     repoOwner: "Creative Commons",
     link: "https://github.com/creativecommons/creativecommons.github.io-source/pull/738",
   },
   {
     repo: "creativecommons",
-    contibutionDescription:
+    description:
       "Added section for 'Other Opportunities' on main page.",
     repoOwner: "Creative Commons",
     link: "https://github.com/creativecommons/creativecommons.github.io-source/pull/719",
   },
 ];
-
-export const featuredContributions: contributionsInterface[] =
-  contributionsUnsorted.slice(0, 3);

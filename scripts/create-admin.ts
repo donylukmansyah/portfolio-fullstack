@@ -1,6 +1,6 @@
 import "dotenv/config";
 
-import { auth } from "./lib/auth";
+import { auth } from "../lib/auth";
 
 async function main() {
   console.log("Creating admin user...");

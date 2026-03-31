@@ -1,3 +1,5 @@
+import { Separator } from "@/components/ui/separator";
+
 interface PageHeaderProps {
   title: string;
   description: string;
@@ -14,7 +16,7 @@ export default function PageHeader({ title, description }: PageHeaderProps) {
           <p className="text-lg text-muted-foreground">{description}</p>
         </div>
       </div>
-      <hr className="my-6" />
+      <Separator className="my-6" />
     </>
   );
 }

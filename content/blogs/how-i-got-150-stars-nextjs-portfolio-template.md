@@ -20,22 +20,18 @@ Here's the story of what I built, what decisions mattered, and what I learned ab
 
 Most portfolio templates require you to edit JSX or dig into components to add your information. That's the wrong abstraction. Your portfolio data — projects, experience, skills — is _content_, not _code_.
 
-I designed the entire template around **configuration objects**. You fill in TypeScript config files and everything renders automatically:
+I designed the template so content can live in the CMS, while initial records can still be seeded from typed data modules when needed:
 
 ```typescript
-// config/projects.ts — this is all you edit
-export const featuredProjects: ProjectConfig[] = [
+// db/seed-data/projects/product-projects.ts
+export const productProjects: SeedProject[] = [
   {
     id: "convot",
-    title: "Convot - AI Chatbot Platform",
-    description: "Embeddable RAG chatbot for businesses",
-    techStack: ["nextjs", "typescript", "fastapi"],
-    links: {
-      live: "https://convot.ai",
-      github: "https://github.com/namanbarkiya/convot",
-    },
+    companyName: "Convot",
+    shortDescription: "Embeddable RAG chatbot for businesses",
+    techStack: ["Next.js", "Typescript", "Python"],
   },
-  // ... add more, remove some — that's it
+  // ... add more, or manage live content in /admin
 ];
 ```
 

@@ -9,12 +9,12 @@ import {
   socialLinks,
   siteSettings,
 } from "./schema";
-import { Projects } from "../config/projects";
-import { experiences as staticExperiences } from "../config/experience";
-import { skillsUnsorted } from "../config/skills";
-import { contributionsUnsorted } from "../config/contributions";
-import { SocialLinks } from "../config/socials";
 import { siteConfig } from "../config/site";
+import { seedContributions } from "./seed-data/contributions";
+import { seedExperiences } from "./seed-data/experience";
+import { seedProjects } from "./seed-data/projects";
+import { seedSkills } from "./seed-data/skills";
+import { seedSocialLinks } from "./seed-data/socials";
 
 async function main() {
   console.log("Starting database seeding...");
@@ -23,7 +23,7 @@ async function main() {
 
   // 1. Projects
   console.log("Seeding projects...");
-  for (const project of Projects) {
+  for (const project of seedProjects) {
     await db.insert(projects).values({
       slug: project.id, // Falling back to ID since slug is not in the interface natively
       companyName: project.companyName,
@@ -35,16 +35,16 @@ async function main() {
       techStack: project.techStack,
       startDate: formatDate(project.startDate),
       endDate: formatDate(project.endDate),
-      companyLogoImg: typeof project.companyLogoImg === 'string' ? project.companyLogoImg : project.companyLogoImg?.src || "",
-      descriptionDetails: project.descriptionDetails as any, 
+      companyLogoImg: project.companyLogoImg,
+      descriptionDetails: project.descriptionDetails as any,
       pagesInfo: project.pagesInfoArr as any, // Mapped from pagesInfoArr
-      isFeatured: false, // Not in ProjectInterface natively, default to false
+      isFeatured: project.isFeatured ?? false,
     }).onConflictDoNothing(); // Prevent duplicates on re-run
   }
 
   // 2. Experiences
   console.log("Seeding experiences...");
-  for (const exp of staticExperiences) {
+  for (const exp of seedExperiences) {
     await db.insert(experiences).values({
       slug: exp.company.toLowerCase().replace(/\s+/g, '-'), // Basic slug generation
       position: exp.position,
@@ -57,41 +57,41 @@ async function main() {
       achievements: exp.achievements,
       skills: exp.skills,
       companyUrl: exp.companyUrl,
-      // Handle static imports vs string URLs
-      logo: typeof exp.logo === 'string' ? exp.logo : ((exp.logo as any)?.src || ""),
+      logo: exp.logo || "",
     }).onConflictDoNothing();
   }
 
   // 3. Skills
   console.log("Seeding skills...");
-  for (const skill of skillsUnsorted) {
+  for (const skill of seedSkills) {
     await db.insert(skills).values({
       name: skill.name,
       description: skill.description,
       rating: skill.rating,
-      iconKey: "default", // Assuming icon is a React component reference, we fallback to default string
-      isFeatured: false,
+      iconKey: skill.iconKey,
+      isFeatured: skill.isFeatured ?? false,
     }).onConflictDoNothing();
   }
 
   // 4. Contributions
   console.log("Seeding contributions...");
-  for (const contrib of contributionsUnsorted) {
+  for (const contrib of seedContributions) {
     await db.insert(contributions).values({
       repo: contrib.repo,
-      description: contrib.contibutionDescription, // Typo in original interface
+      description: contrib.description,
       repoOwner: contrib.repoOwner,
       link: contrib.link,
+      isFeatured: contrib.isFeatured ?? false,
     }).onConflictDoNothing();
   }
 
   // 5. Social Links
   console.log("Seeding social links...");
-  for (const social of SocialLinks) {
+  for (const social of seedSocialLinks) {
     await db.insert(socialLinks).values({
       name: social.name,
       username: social.username,
-      iconKey: social.icon,
+      iconKey: social.iconKey,
       link: social.link,
     }).onConflictDoNothing();
   }
