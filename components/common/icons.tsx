@@ -43,7 +43,7 @@ import {
   HiOutlineLink,
 } from "react-icons/hi";
 import { IoIosGitBranch } from "react-icons/io";
-import { FaAws, FaCss3, FaLinkedin } from "react-icons/fa";
+import { FaAws, FaCss3, FaLinkedin, FaInstagram } from "react-icons/fa";
 import {
   SiAngular,
   SiBootstrap,
@@ -126,6 +126,7 @@ export const Icons = {
   gmail: SiGmail,
   twitter: SiX,
   linkedin: FaLinkedin,
+  instagram: FaInstagram,
   userFill: BiSolidUser,
   work: HiBriefcase,
   gitHub: ({ ...props }: LucideProps) => (

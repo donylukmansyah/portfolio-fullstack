@@ -29,6 +29,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           src={project.companyLogoImg || "/logo.png"}
           alt={project.companyName}
           fill
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
       <div className="pt-5 space-y-3 flex flex-col flex-grow">
@@ -41,12 +42,12 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         <div className="flex gap-2 flex-wrap">
           <ChipContainer textArr={project.category} />
         </div>
-        <Link href={`/projects/${project.slug}`} className="mt-auto">
-          <Button variant={"default"} className="mt-2 w-full sm:w-auto">
+        <Button asChild variant={"default"} className="mt-auto w-fit">
+          <Link href={`/projects/${project.slug}`}>
             Read more
             <Icons.chevronRight className="w-4 ml-1" />
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
       <div className="absolute bottom-4 right-4 p-3 rounded-full bg-background border border-border hidden md:block">
         {project.type === "Personal" ? (

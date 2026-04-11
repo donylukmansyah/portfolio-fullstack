@@ -15,8 +15,8 @@ interface HomeHeroProps {
 
 export function HomeHero({ hero }: HomeHeroProps) {
   return (
-    <section className="mb-0 flex h-screen items-center space-y-6 pb-8 pt-6 md:py-20 md:pb-12 lg:py-32">
-      <div className="container -mt-20 flex max-w-[64rem] flex-col items-center gap-4 text-center">
+    <section className="mb-0 flex min-h-[calc(100dvh-5rem)] items-center space-y-6 pb-8 pt-6 md:min-h-screen md:py-20 md:pb-12 lg:py-32">
+      <div className="container mt-4 flex max-w-[64rem] flex-col items-center gap-4 text-center md:-mt-20">
         <Image
           src={hero.image || profileImg}
           height={100}

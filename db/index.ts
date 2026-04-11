@@ -14,7 +14,11 @@ function createPostgresClient() {
     throw new Error("DATABASE_URL is not configured.");
   }
 
-  return postgres(connectionString, { prepare: false });
+  return postgres(connectionString, { 
+    prepare: false,
+    idle_timeout: 20,
+    max_lifetime: 60 * 30,
+  });
 }
 
 const client = globalThis.postgresClient ?? createPostgresClient();
