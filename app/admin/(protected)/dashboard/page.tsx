@@ -5,7 +5,7 @@ import {
   projects,
   experiences,
   skills,
-  contributions,
+  certificates,
   contactSubmissions,
   siteSettings,
 } from "@/db/schema";
@@ -33,7 +33,7 @@ async function getStats() {
     [projectCount],
     [experienceCount],
     [skillCount],
-    [contributionCount],
+    [certificateCount],
     [messageCount],
     [unreadCount],
     latestProjects,
@@ -42,7 +42,7 @@ async function getStats() {
     db.select({ count: count() }).from(projects),
     db.select({ count: count() }).from(experiences),
     db.select({ count: count() }).from(skills),
-    db.select({ count: count() }).from(contributions),
+    db.select({ count: count() }).from(certificates),
     db.select({ count: count() }).from(contactSubmissions),
     db.select({ count: count() }).from(contactSubmissions).where(eq(contactSubmissions.isRead, false)),
     db
@@ -72,7 +72,7 @@ async function getStats() {
     projects: projectCount.count,
     experiences: experienceCount.count,
     skills: skillCount.count,
-    contributions: contributionCount.count,
+    certificates: certificateCount.count,
     messages: messageCount.count,
     unread: unreadCount.count,
     latestProjects,
@@ -84,7 +84,7 @@ const statCards = (stats: Awaited<ReturnType<typeof getStats>>) => [
   { label: "Projects", value: stats.projects, icon: FolderOpen, href: "/admin/projects", color: "text-blue-500" },
   { label: "Experiences", value: stats.experiences, icon: Briefcase, href: "/admin/experience", color: "text-violet-500" },
   { label: "Skills", value: stats.skills, icon: Zap, href: "/admin/skills", color: "text-yellow-500" },
-  { label: "Contributions", value: stats.contributions, icon: GitMerge, href: "/admin/contributions", color: "text-green-500" },
+  { label: "Certificates", value: stats.certificates, icon: GitMerge, href: "/admin/certificates", color: "text-green-500" },
   {
     label: "Messages",
     value: stats.messages,
@@ -161,7 +161,7 @@ export default async function DashboardPage() {
               { label: "Edit Hero", href: "/admin/hero" },
               { label: "Site Settings", href: "/admin/settings" },
               { label: "View Messages", href: "/admin/contacts" },
-              { label: "Add Contribution", href: "/admin/contributions/new" },
+              { label: "Add Certificate", href: "/admin/certificates/new" },
             ].map((action) => (
               <Link
                 key={action.href}

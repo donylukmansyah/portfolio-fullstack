@@ -46,13 +46,13 @@ export const pagesConfig: PagesConfig = {
       description: "Contact Dony L.",
     },
   },
-  contributions: {
-    title: "Contributions",
-    description: "Open-source contributions and community involvement.",
+  certificates: {
+    title: "Certificates",
+    description: "Sertifikasi dan pencapaian profesional.",
     metadata: {
-      title: "Contributions",
+      title: "Certificates",
       description:
-        "Dony L's open-source contributions and community involvement.",
+        "Dony L's professional certifications and achievements.",
     },
   },
   resume: {

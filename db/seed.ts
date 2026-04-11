@@ -5,12 +5,12 @@ import {
   projects,
   experiences,
   skills,
-  contributions,
+  certificates,
   socialLinks,
   siteSettings,
 } from "./schema";
 import { siteConfig } from "../config/site";
-import { seedContributions } from "./seed-data/contributions";
+// Certificates are managed through admin panel (no seed data)
 import { seedExperiences } from "./seed-data/experience";
 import { seedProjects } from "./seed-data/projects";
 import { seedSkills } from "./seed-data/skills";
@@ -73,17 +73,7 @@ async function main() {
     }).onConflictDoNothing();
   }
 
-  // 4. Contributions
-  console.log("Seeding contributions...");
-  for (const contrib of seedContributions) {
-    await db.insert(contributions).values({
-      repo: contrib.repo,
-      description: contrib.description,
-      repoOwner: contrib.repoOwner,
-      link: contrib.link,
-      isFeatured: contrib.isFeatured ?? false,
-    }).onConflictDoNothing();
-  }
+  // 4. Certificates (managed via admin panel, skip seeding)
 
   // 5. Social Links
   console.log("Seeding social links...");

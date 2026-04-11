@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminFormShell } from "@/components/admin/form-shell";
+import { ImageUpload } from "@/components/admin/image-upload";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -13,53 +14,55 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { submitAdminForm } from "@/lib/admin-client";
-import { contributionSchema, type ContributionInput } from "@/lib/validations";
+import { certificateSchema, type CertificateInput } from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ExternalLink, Loader2, Sparkles } from "lucide-react";
+import { Award, FileText, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 
-interface ContributionFormProps {
-  initialData?: ContributionInput & { id: string };
+interface CertificateFormProps {
+  initialData?: CertificateInput & { id: string };
 }
 
-export function ContributionForm({ initialData }: ContributionFormProps) {
+export function CertificateForm({ initialData }: CertificateFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<ContributionInput>({
-    resolver: zodResolver(contributionSchema),
+  const form = useForm<CertificateInput>({
+    resolver: zodResolver(certificateSchema),
     defaultValues: initialData || {
-      repo: "",
+      name: "",
       description: "",
-      repoOwner: "",
-      link: "",
+      issuer: "",
+      imageUrl: "",
+      imagePublicId: "",
       isFeatured: false,
       sortOrder: 0,
     },
   });
 
-  async function onSubmit(data: ContributionInput) {
+  async function onSubmit(data: CertificateInput) {
     setIsLoading(true);
     try {
       const isEdit = !!initialData;
       const url = isEdit
-        ? `/api/admin/contributions/${initialData.id}`
-        : "/api/admin/contributions";
+        ? `/api/admin/certificates/${initialData.id}`
+        : "/api/admin/certificates";
       const method = isEdit ? "PUT" : "POST";
 
       await submitAdminForm(url, method, data);
 
       toast({
-        title: isEdit ? "Contribution updated" : "Contribution added",
+        title: isEdit ? "Certificate updated" : "Certificate added",
         description: "Your changes have been saved successfully.",
       });
 
-      router.push("/admin/contributions");
+      router.push("/admin/certificates");
       router.refresh();
     } catch (error: any) {
       toast({
@@ -76,21 +79,21 @@ export function ContributionForm({ initialData }: ContributionFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
         <AdminFormShell
-          title={initialData ? "Edit Contribution" : "Create Contribution"}
-          description="Track repository contributions with cleaner metadata, stronger featured controls, and quick outbound verification."
+          title={initialData ? "Edit Certificate" : "Create Certificate"}
+          description="Tambahkan atau perbarui sertifikat, upload gambar sertifikat, dan atur visibilitas."
           modeLabel={initialData ? "Edit Mode" : "Create Mode"}
           actions={
             <>
               <Button
                 variant="outline"
                 type="button"
-                onClick={() => router.push("/admin/contributions")}
+                onClick={() => router.push("/admin/certificates")}
               >
                 Cancel
               </Button>
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Contribution
+                Save Certificate
               </Button>
             </>
           }
@@ -101,65 +104,63 @@ export function ContributionForm({ initialData }: ContributionFormProps) {
                   Quick Preview
                 </p>
                 <h2 className="mt-1 text-lg font-semibold text-foreground">
-                  {form.watch("repoOwner") || "owner"}/
-                  {form.watch("repo") || "repository"}
+                  {form.watch("name") || "Untitled certificate"}
                 </h2>
                 <p className="text-muted-foreground">
                   {form.watch("description") ||
-                    "Add a short description to summarize the contribution."}
+                    "Add a short description for this certificate."}
                 </p>
               </div>
               <div className="rounded-2xl border border-border/60 p-3">
                 <div className="flex items-center gap-2 font-medium text-foreground">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  Visibility
+                  <Award className="h-4 w-4 text-primary" />
+                  Certificate Info
                 </div>
                 <p className="mt-2 text-muted-foreground">
-                  {form.watch("isFeatured")
-                    ? "Featured contribution"
-                    : "Standard contribution"}
+                  Issuer: {form.watch("issuer") || "—"} •{" "}
+                  {form.watch("isFeatured") ? "Featured" : "Standard"}
                 </p>
               </div>
-              {form.watch("link") ? (
-                <a
-                  href={form.watch("link")}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                >
-                  Open contribution link
-                  <ExternalLink className="h-4 w-4" />
-                </a>
-              ) : null}
+              {form.watch("imageUrl") && (
+                <div className="rounded-xl overflow-hidden border">
+                  {form.watch("imageUrl")?.toLowerCase().endsWith(".pdf") ||
+                  form.watch("imageUrl")?.includes("/raw/") ? (
+                    <div className="flex items-center gap-3 p-4 bg-muted/50">
+                      <FileText className="h-6 w-6 text-red-500" />
+                      <a
+                        href={form.watch("imageUrl") || ""}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Preview PDF ↗
+                      </a>
+                    </div>
+                  ) : (
+                    <img
+                      src={form.watch("imageUrl") || ""}
+                      alt="Certificate preview"
+                      className="w-full h-auto"
+                    />
+                  )}
+                </div>
+              )}
             </div>
           }
         >
           <Card>
             <CardHeader>
-              <CardTitle>Contribution Details</CardTitle>
+              <CardTitle>Certificate Details</CardTitle>
             </CardHeader>
             <CardContent className="grid gap-6">
               <FormField
                 control={form.control}
-                name="repo"
+                name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Repository Name</FormLabel>
+                    <FormLabel>Certificate Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="E.g. next.js" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="repoOwner"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Repository Owner</FormLabel>
-                    <FormControl>
-                      <Input placeholder="E.g. vercel" {...field} />
+                      <Input placeholder="E.g. Belajar Membuat Aplikasi Web dengan React" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -172,8 +173,10 @@ export function ContributionForm({ initialData }: ContributionFormProps) {
                   <FormItem>
                     <FormLabel>Description</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="What did you contribute?"
+                      <Textarea
+                        placeholder="Deskripsi singkat tentang sertifikat..."
+                        className="resize-none"
+                        rows={3}
                         {...field}
                       />
                     </FormControl>
@@ -183,12 +186,37 @@ export function ContributionForm({ initialData }: ContributionFormProps) {
               />
               <FormField
                 control={form.control}
-                name="link"
+                name="issuer"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Contribution Link</FormLabel>
+                    <FormLabel>Issuer</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://github.com/..." {...field} />
+                      <Input placeholder="E.g. Dicoding, Google, Coursera" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="imageUrl"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Certificate File</FormLabel>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Upload gambar (JPG, PNG, WebP) atau file PDF sertifikat.
+                    </p>
+                    <FormControl>
+                      <ImageUpload
+                        value={field.value || ""}
+                        onChange={(url) => field.onChange(url)}
+                        folder="portfolio/certificates"
+                        accept="image/*,application/pdf"
+                        label="Upload Image / PDF"
+                        onUploadComplete={(asset) => {
+                          form.setValue("imagePublicId", asset.publicId || "");
+                        }}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -202,7 +230,7 @@ export function ContributionForm({ initialData }: ContributionFormProps) {
                     <div className="space-y-0.5">
                       <FormLabel>Featured</FormLabel>
                       <p className="text-sm text-muted-foreground">
-                        Highlight this contribution in key showcase sections.
+                        Tampilkan sertifikat ini di halaman utama.
                       </p>
                     </div>
                     <FormControl>

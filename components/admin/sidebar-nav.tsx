@@ -16,11 +16,11 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import {
+  Award,
   Briefcase,
   ChevronRight,
   FileText,
   FolderOpen,
-  GitMerge,
   Home,
   LayoutDashboard,
   Link2,
@@ -48,7 +48,7 @@ const navGroups = [
       { href: "/admin/projects", label: "Projects", icon: FolderOpen },
       { href: "/admin/experience", label: "Experience", icon: Briefcase },
       { href: "/admin/skills", label: "Skills", icon: Zap },
-      { href: "/admin/contributions", label: "Contributions", icon: GitMerge },
+      { href: "/admin/certificates", label: "Certificates", icon: Award },
       { href: "/admin/social-links", label: "Social Links", icon: Link2 },
     ],
   },

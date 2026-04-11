@@ -4,7 +4,7 @@ import Script from "next/script";
 import BlogCard from "@/components/blogs/blog-card";
 import { AnimatedSection } from "@/components/common/animated-section";
 import { ClientPageWrapper } from "@/components/common/client-page-wrapper";
-import ContributionCard from "@/components/contributions/contribution-card";
+import CertificateCard from "@/components/certificates/certificate-card";
 import ExperienceCard from "@/components/experience/experience-card";
 import { HomeHero } from "@/components/home/home-hero";
 import { HomeSectionHeader } from "@/components/home/home-section-header";
@@ -17,7 +17,7 @@ import { buildHomeStructuredData, resolveHomeHero } from "@/lib/home-page";
 import {
   getFeaturedProjects,
   getExperiences,
-  getFeaturedContributions,
+  getFeaturedCertificates,
   getFeaturedSkills,
   getActiveHero,
 } from "@/lib/queries";
@@ -36,14 +36,14 @@ export default async function IndexPage() {
   const [
     featuredProjects,
     allExperiences,
-    featuredContributions,
+    featuredCertificates,
     featuredSkills,
     heroData,
     featuredBlogs,
   ] = await Promise.all([
     getFeaturedProjects(),
     getExperiences(),
-    getFeaturedContributions(),
+    getFeaturedCertificates(),
     getFeaturedSkills(),
     getActiveHero(),
     getFeaturedBlogs(),
@@ -118,14 +118,14 @@ export default async function IndexPage() {
       <AnimatedSection
         direction="up"
         className="container space-y-6 bg-muted py-10 my-14"
-        id="contributions"
+        id="certificates"
       >
         <HomeSectionHeader
-          title={pagesConfig.contributions.title}
-          description={pagesConfig.contributions.description}
+          title={pagesConfig.certificates.title}
+          description={pagesConfig.certificates.description}
         />
-        <ContributionCard contributions={featuredContributions} />
-        <HomeViewAll href="/contributions" />
+        <CertificateCard certificates={featuredCertificates} />
+        <HomeViewAll href="/certificates" />
       </AnimatedSection>
       <AnimatedSection
         direction="up"

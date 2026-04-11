@@ -82,16 +82,17 @@ export const skillSchema = z.object({
 });
 export type SkillInput = z.infer<typeof skillSchema>;
 
-/* ─── Contribution ────────────────────────────────────────── */
-export const contributionSchema = z.object({
-  repo: z.string().min(1),
-  description: z.string().min(1),
-  repoOwner: z.string().min(1),
-  link: z.string().url(),
+/* ─── Certificate ─────────────────────────────────────────── */
+export const certificateSchema = z.object({
+  name: z.string().min(1, "Certificate name is required"),
+  description: z.string().min(1, "Description is required"),
+  issuer: z.string().min(1, "Issuer is required"),
+  imageUrl: z.string().optional().or(z.literal("")),
+  imagePublicId: z.string().optional().or(z.literal("")),
   isFeatured: z.boolean().default(false),
   sortOrder: z.number().int().default(0),
 });
-export type ContributionInput = z.infer<typeof contributionSchema>;
+export type CertificateInput = z.infer<typeof certificateSchema>;
 
 /* ─── Social Link ─────────────────────────────────────────── */
 export const socialLinkSchema = z.object({

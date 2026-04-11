@@ -1,11 +1,12 @@
 import { pgTable, uuid, text, boolean, integer, timestamp } from "drizzle-orm/pg-core";
 
-export const contributions = pgTable("contributions", {
+export const certificates = pgTable("certificates", {
   id: uuid("id").defaultRandom().primaryKey(),
-  repo: text("repo").notNull(),
+  name: text("name").notNull(),
   description: text("description").notNull(),
-  repoOwner: text("repo_owner").notNull(),
-  link: text("link").notNull(),
+  issuer: text("issuer").notNull(),
+  imageUrl: text("image_url"),
+  imagePublicId: text("image_public_id"),
   isFeatured: boolean("is_featured").default(false),
   sortOrder: integer("sort_order").default(0),
   createdAt: timestamp("created_at").defaultNow().notNull(),

@@ -20,10 +20,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/admin/login", request.url));
   }
 
-  // Redirect already-authenticated users away from the login page
-  if (isLoginPage && sessionCookie) {
-    return NextResponse.redirect(new URL("/admin/dashboard", request.url));
-  }
+
 
   return NextResponse.next();
 }

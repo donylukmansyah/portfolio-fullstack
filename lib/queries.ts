@@ -3,7 +3,7 @@ import "server-only";
 import { db } from "@/db";
 import {
   blogs,
-  contributions,
+  certificates,
   experiences,
   heroContent,
   projects,
@@ -204,21 +204,21 @@ export const getFeaturedSkills = unstable_cache(
   { tags: ["skills"], revalidate: 3600 }
 );
 
-/* ─── Contributions ────────────────────────────────────────── */
-export const getContributions = unstable_cache(
+/* ─── Certificates ─────────────────────────────────────────── */
+export const getCertificates = unstable_cache(
   async () => {
-    return db.select().from(contributions).orderBy(asc(contributions.sortOrder), desc(contributions.createdAt));
+    return db.select().from(certificates).orderBy(asc(certificates.sortOrder), desc(certificates.createdAt));
   },
-  ["all-contributions"],
-  { tags: ["contributions"], revalidate: 3600 }
+  ["all-certificates"],
+  { tags: ["certificates"], revalidate: 3600 }
 );
 
-export const getFeaturedContributions = unstable_cache(
+export const getFeaturedCertificates = unstable_cache(
   async () => {
-    return db.select().from(contributions).where(eq(contributions.isFeatured, true)).orderBy(asc(contributions.sortOrder));
+    return db.select().from(certificates).where(eq(certificates.isFeatured, true)).orderBy(asc(certificates.sortOrder));
   },
-  ["featured-contributions"],
-  { tags: ["contributions"], revalidate: 3600 }
+  ["featured-certificates"],
+  { tags: ["certificates"], revalidate: 3600 }
 );
 
 /* ─── Social Links ─────────────────────────────────────────── */

@@ -27,7 +27,7 @@ export default async function MarketingLayout({ children }: MarketingLayoutProps
               <ModeToggle />
             </div>
           </MainNav>
-          <nav className="flex items-center gap-5">
+          <nav className="flex items-center gap-3">
             <GitHubStarBadge />
             <ModeToggle />
           </nav>

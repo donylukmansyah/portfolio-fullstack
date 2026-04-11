@@ -4,7 +4,7 @@ export const seedSkills: SeedSkill[] = [
   {
     name: "Next.js",
     description:
-      "Effortlessly build dynamic apps with routing, layouts, loading UI, and API routes.",
+      "Membangun aplikasi web dinamis dengan mudah menggunakan routing, layout, loading UI, dan API routes.",
     rating: 5,
     iconKey: "nextjs",
     isFeatured: true,
@@ -12,7 +12,7 @@ export const seedSkills: SeedSkill[] = [
   {
     name: "React",
     description:
-      "Craft interactive user interfaces using components, state, props, and virtual DOM.",
+      "Membuat antarmuka pengguna yang interaktif menggunakan komponen, state, props, dan virtual DOM.",
     rating: 5,
     iconKey: "react",
     isFeatured: true,
@@ -20,7 +20,7 @@ export const seedSkills: SeedSkill[] = [
   {
     name: "GraphQL",
     description:
-      "Fetch data precisely with a powerful query language for APIs and runtime execution.",
+      "Mengambil data secara presisi dengan bahasa query yang powerful untuk API dan eksekusi runtime.",
     rating: 4,
     iconKey: "graphql",
     isFeatured: true,
@@ -28,7 +28,7 @@ export const seedSkills: SeedSkill[] = [
   {
     name: "Nest.js",
     description:
-      "Create scalable and modular applications with a progressive Node.js framework.",
+      "Membuat aplikasi yang scalable dan modular dengan framework Node.js yang progresif.",
     rating: 4,
     iconKey: "nestjs",
     isFeatured: true,
@@ -36,7 +36,7 @@ export const seedSkills: SeedSkill[] = [
   {
     name: "express.js",
     description:
-      "Build web applications and APIs quickly using a fast, unopinionated Node.js framework.",
+      "Membangun aplikasi web dan API dengan cepat menggunakan framework Node.js yang ringan dan fleksibel.",
     rating: 5,
     iconKey: "express",
     isFeatured: true,
@@ -44,7 +44,7 @@ export const seedSkills: SeedSkill[] = [
   {
     name: "Node.js",
     description:
-      "Run JavaScript on the server side, enabling dynamic and responsive applications.",
+      "Menjalankan JavaScript di sisi server untuk membangun aplikasi yang dinamis dan responsif.",
     rating: 5,
     iconKey: "nodejs",
     isFeatured: true,
@@ -52,105 +52,105 @@ export const seedSkills: SeedSkill[] = [
   {
     name: "MongoDB",
     description:
-      "Store and retrieve data seamlessly with a flexible and scalable NoSQL database.",
+      "Menyimpan dan mengambil data dengan mudah menggunakan database NoSQL yang fleksibel dan scalable.",
     rating: 5,
     iconKey: "mongodb",
   },
   {
     name: "Typescript",
     description:
-      "Enhance JavaScript with static types, making code more understandable and reliable.",
+      "Meningkatkan JavaScript dengan tipe statis, membuat kode lebih mudah dipahami dan lebih handal.",
     rating: 5,
     iconKey: "typescript",
   },
   {
     name: "Javascript",
     description:
-      "Create interactive and dynamic web experiences with the versatile scripting language.",
+      "Membuat pengalaman web yang interaktif dan dinamis dengan bahasa scripting yang serbaguna.",
     rating: 5,
     iconKey: "javascript",
   },
   {
     name: "HTML 5",
     description:
-      "Structure web content beautifully with the latest version of HyperText Markup Language.",
+      "Menyusun konten web dengan indah menggunakan versi terbaru dari HyperText Markup Language.",
     rating: 4,
     iconKey: "html5",
   },
   {
     name: "CSS 3",
     description:
-      "Style web pages creatively with the latest iteration of Cascading Style Sheets.",
+      "Mendesain halaman web secara kreatif dengan iterasi terbaru dari Cascading Style Sheets.",
     rating: 4,
     iconKey: "css3",
   },
   {
     name: "React Native",
     description:
-      "Develop cross-platform mobile apps using React for consistent and engaging experiences.",
+      "Mengembangkan aplikasi mobile cross-platform menggunakan React untuk pengalaman yang konsisten.",
     rating: 4,
     iconKey: "react",
   },
   {
     name: "Angular",
     description:
-      "Build dynamic web apps with a TypeScript-based open-source framework by Google.",
+      "Membangun aplikasi web dinamis dengan framework open-source berbasis TypeScript dari Google.",
     rating: 3,
     iconKey: "angular",
   },
   {
     name: "Redux",
     description:
-      "Manage app state effectively using a predictable and centralized state container.",
+      "Mengelola state aplikasi secara efektif menggunakan state container yang terprediksi dan terpusat.",
     rating: 4,
     iconKey: "redux",
   },
   {
     name: "Socket.io",
     description:
-      "Enable real-time, bidirectional communication between clients and servers effortlessly.",
+      "Mengaktifkan komunikasi real-time dan dua arah antara client dan server dengan mudah.",
     rating: 3,
     iconKey: "socketio",
   },
   {
     name: "Material UI",
     description:
-      "Create stunning and responsive UIs with a popular React UI framework.",
+      "Membuat UI yang menakjubkan dan responsif dengan framework UI React yang populer.",
     rating: 4,
     iconKey: "mui",
   },
   {
     name: "Tailwind CSS",
     description:
-      "Design beautiful, modern websites faster with a utility-first CSS framework.",
+      "Mendesain website modern dan indah dengan lebih cepat menggunakan framework CSS utility-first.",
     rating: 5,
     iconKey: "tailwindcss",
   },
   {
     name: "AWS",
     description:
-      "Utilize Amazon Web Services to build and deploy scalable, reliable, and secure applications.",
+      "Memanfaatkan Amazon Web Services untuk membangun dan deploy aplikasi yang scalable dan aman.",
     rating: 3,
     iconKey: "amazonaws",
   },
   {
     name: "Bootstrap",
     description:
-      "Quickly create responsive and appealing web designs using a popular CSS framework.",
+      "Membuat desain web yang responsif dan menarik dengan cepat menggunakan framework CSS populer.",
     rating: 2,
     iconKey: "bootstrap",
   },
   {
     name: "MySQL",
     description:
-      "Manage and organize relational databases efficiently for data-driven applications.",
+      "Mengelola dan mengorganisir database relasional secara efisien untuk aplikasi berbasis data.",
     rating: 2,
     iconKey: "mysql",
   },
   {
     name: "Netlify",
     description:
-      "Manage static sites and deploy fast front-end experiences with a streamlined workflow.",
+      "Mengelola situs statis dan deploy pengalaman front-end yang cepat dengan alur kerja yang efisien.",
     rating: 4,
     iconKey: "netlify",
   },
